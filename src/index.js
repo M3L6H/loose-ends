@@ -16,7 +16,15 @@ async function clone(repo, pat='') {
   return result;
 }
 
-clone('https://github.com/M3L6H/loose-ends.git').then(refs => {
-  const textNode = document.createTextNode(refs);
-  document.body.appendChild(textNode);
-});
+function init() {
+  clone('https://github.com/M3L6H/loose-ends.git')
+    .then(refs => {
+      const textNode = document.createTextNode(refs);
+      document.body.appendChild(textNode);
+    }).catch(err => {
+      const textNode = document.createTextNode(err.message);
+      document.body.appendChild(textNode);
+    });
+}
+
+addEventListener('load', () => init());
