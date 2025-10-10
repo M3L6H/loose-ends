@@ -121,7 +121,7 @@ async function gitReq(url, method='GET', headers={}, body) {
   });
   
   if (!response.ok) {
-    throw new Error(`Response status: ${response.status}`);
+    throw new Error(`ERROR: Status: ${response.status}; Body: ${await response.text()}`);
   }
   
   return await parsePktLines(response.body.getReader());
