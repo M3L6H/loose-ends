@@ -7,7 +7,7 @@ async function parsePktLines(reader) {
   const lines = [];
   let len = null;
   let s = e = 0;
-  const curr = new Uint8Array(PKT_SIZE_BYTE_COUNT + 0xffff);
+  const curr = new Uint8Array(0xffff);
   
   while (true) {
     const { done, value } = await reader.read();
@@ -25,7 +25,7 @@ async function parsePktLines(reader) {
         if (e - s < PKT_SIZE_BYTE_COUNT) continue;
         const d = curr.subarray(s, s + PKT_SIZE_BYTE_COUNT);
         s += PKT_SIZE_BYTE_COUNT;
-        len = parseInt(td.decode(d), HEX_BASE);
+        len = parseInt(td.decode(d), HEX_BASE) - PKT_SIZE_BYTE_COUNT;
       }
       lines.push(`len: ${len}; s: ${s}; e: ${e}; curr: ${curr}`);
 
