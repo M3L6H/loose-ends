@@ -69,7 +69,7 @@ function lenToBytes(len) {
 
 function createPktLines(lines) {
   const msgLen = lines.reduce((acc, curr) =>
-    acc + PKT_SIZE_BYTE_COUNT + curr.length + (curr.endsWith('\n') ? 0 : 1),
+    acc + PKT_SIZE_BYTE_COUNT + curr.length + (curr.length > 0 && curr.endsWith('\n') ? 0 : 1),
   0);
   
   const data = new Uint8Array(msgLen);
