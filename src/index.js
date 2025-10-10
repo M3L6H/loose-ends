@@ -77,8 +77,8 @@ function createPktLines(lines) {
   
   for (let line of lines) {
     if (line === '') {
-      data.set(idx, [0, 0, 0, 0]);
-      idx += 4;
+      data.set([0, 0, 0, 0], idx);
+      idx += PKT_SIZE_BYTE_COUNT;
       continue;
     }
     
@@ -87,10 +87,10 @@ function createPktLines(lines) {
     }
     
     const len = line.length;
-    data.set(idx, lenToBytes(len));
-    idx += 4;
+    data.set(lenToBytes(len), idx);
+    idx += PKT_SIZE_BYTE_COUNT;
     
-    data.set(idx, toBytes(line));
+    data.set(toBytes(line), idx);
     idx += len;
     
     addLine(`pkt: msgLen: ${msgLen}; line: ${line}; data: ${data}`);
