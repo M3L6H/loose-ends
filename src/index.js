@@ -64,7 +64,7 @@ function toBytes(str) {
 }
 
 function lenToBytes(len) {
-  return toBytes(len.toString(HEX_BYTES).padStart(PKT_SIZE_BYTE_COUNT, '0'));
+  return toBytes(len.toString(HEX_BASE).padStart(PKT_SIZE_BYTE_COUNT, '0'));
 }
 
 function createPktLines(lines) {
