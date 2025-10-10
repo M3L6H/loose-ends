@@ -68,7 +68,7 @@ function lenToBytes(len) {
   return toBytes(len.toString(HEX_BASE).padStart(PKT_SIZE_BYTE_COUNT, '0'));
 }
 
-function createPktLines(lines) {
+async function createPktLines(lines) {
   const msgLen = lines.reduce((acc, curr) =>
     acc + PKT_SIZE_BYTE_COUNT + curr.length + (curr.length === 0 || curr.endsWith('\n') ? 0 : 1),
   0);
