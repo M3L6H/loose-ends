@@ -51,13 +51,6 @@ async function parsePktLines(reader) {
       len = null;
     }
   }
-  
-  parsePktLines(new ReadableStream({
-    start(controller) {
-      controller.enqueue(data);
-      controller.close();
-    },
-  }).getReader()).forEach(addLine);
 
   return lines;
 }
@@ -102,6 +95,13 @@ function createPktLines(lines) {
     
     addLine(`pkt: msgLen: ${msgLen}; line: ${line}; data: ${data}`);
   }
+  
+  parsePktLines(new ReadableStream({
+    start(controller) {
+      controller.enqueue(data);
+      controller.close();
+    },
+  }).getReader()).forEach(addLine);
   
   return data;
 }
