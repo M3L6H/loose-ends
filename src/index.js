@@ -48,6 +48,8 @@ async function clone(repo, pat='') {
 
   const response = await fetch(uploadPackUrl, {
     headers: {
+      'User-Agent': 'git/2.0.0',
+      'Accept': '*/*',
       'Git-Protocol': 'version=2',
     },
   });
