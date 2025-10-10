@@ -86,7 +86,7 @@ function createPktLines(lines) {
       line += '\n';
     }
     
-    const len = line.length;
+    const len = line.length + PKT_SIZE_BYTE_COUNT;
     data.set(lenToBytes(len), idx);
     idx += PKT_SIZE_BYTE_COUNT;
     
