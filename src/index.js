@@ -25,7 +25,7 @@ async function parsePktLines(stream) {
     
       const d = curr.subarray(s, s + len);
       s += len;
-      lines.push(td.decode(d).strip());
+      lines.push(td.decode(d).trim());
     }
     
     // Flush
