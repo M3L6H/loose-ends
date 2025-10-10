@@ -3,6 +3,13 @@ const PKT_SIZE_BYTE_COUNT = 4;
 
 const td = new TextDecoder('utf-8');
 
+function addLine(line) {
+  const textNode = document.createTextNode(line);
+  const p = document.createElement('p');
+  p.appendChild(textNode);
+  document.body.appendChild(p);
+}
+
 async function parsePktLines(reader) {
   const lines = [];
   let len = null;
@@ -33,6 +40,7 @@ async function parsePktLines(reader) {
         const d = curr.subarray(s, s + len);
         s += len;
         lines.push(td.decode(d).trim());
+        addLine(`s: ${s}; e: ${e}; line: ${lines[lines.length - 1]}`);
       }
 
       // Flush
@@ -56,7 +64,7 @@ function toBytes(str) {
 }
 
 function lenToBytes(len) {
-  return toBytes(len.toString(HEX_BASE).padStart(PKT_SIZE_BYTE_COUNT, '0'));
+  return toBytes(len.toString(HEX_BYTES).padStart(PKT_SIZE_BYTE_COUNT, '0'));
 }
 
 function createPktLines(lines) {
@@ -90,6 +98,7 @@ function createPktLines(lines) {
 }
 
 async function gitReq(url, method='GET', headers={}, body) {
+  addLine(`gitReq: url: ${url}; method: ${method}; headers: ${headers}; body: ${body}`);
   const response = await fetch(url, {
     headers: {
       'User-Agent': 'git/2.0.0',
@@ -145,10 +154,7 @@ async function clone(repo, pat='') {
 function init() {
   clone('https://github.com/M3L6H/loose-ends.git')
     .then(lines => lines.forEach(refs => {
-      const textNode = document.createTextNode(refs);
-      const p = document.createElement('p');
-      p.appendChild(textNode);
-      document.body.appendChild(p);
+      addLine(refs);
     })).catch(err => {
       const textNode = document.createTextNode(err.message);
       document.body.appendChild(textNode);
