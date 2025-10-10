@@ -40,6 +40,7 @@ async function parsePktLines(reader) {
         const d = curr.subarray(s, s + len);
         s += len;
         lines.push(td.decode(d).trim());
+        addLine(`line: ${lines[lines.length - 1]}`);
       }
 
       // Flush
@@ -48,7 +49,7 @@ async function parsePktLines(reader) {
       e -= s;
       s = 0;
       len = null;
-      addLine(`flush: s: ${s}; e: ${e}; line: ${lines[lines.length - 1]}`);
+      addLine(`flush: s: ${s}; e: ${e}; curr; ${curr}`);
     }
   }
 
@@ -96,7 +97,7 @@ function createPktLines(lines) {
     addLine(`pkt: msgLen: ${msgLen}; line: ${line}; data: ${data}`);
   }
   
-  addLine(parsePktLines(new ReadableStream({
+  addLine(await parsePktLines(new ReadableStream({
     start(controller) {
       controller.enqueue(data);
       controller.close();
