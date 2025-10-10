@@ -19,15 +19,13 @@ async function parsePktLines(reader) {
       curr.set(chunk, e);
       e += chunk.length;
       i += chunk.length;
-      lines.push(`s: ${s}; e: ${e}; curr: ${curr}`);
-    
+
       if (len === null) {
         if (e - s < PKT_SIZE_BYTE_COUNT) continue;
         const d = curr.subarray(s, s + PKT_SIZE_BYTE_COUNT);
         s += PKT_SIZE_BYTE_COUNT;
         len = parseInt(td.decode(d), HEX_BASE) - PKT_SIZE_BYTE_COUNT;
       }
-      lines.push(`len: ${len}; s: ${s}; e: ${e}; curr: ${curr}`);
 
       if (len > 0) {
         if (e - s < len) continue;
@@ -43,7 +41,6 @@ async function parsePktLines(reader) {
       e -= s;
       s = 0;
       len = null;
-      lines.push(`flush: len: ${len}; s: ${s}; e: ${e}; curr: ${curr}`);
     }
   }
 
@@ -64,7 +61,7 @@ async function clone(repo, pat='') {
       'Git-Protocol': 'version=2',
     },
   });
-    
+
   if (!response.ok) {
     throw new Error(`Response status: ${response.status}`);
   }
