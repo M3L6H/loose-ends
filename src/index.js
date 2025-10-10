@@ -1,5 +1,9 @@
+function proxyUrl(url) {
+  return `https://corsproxy.io?url=${encodeURIComponent(url)}`;
+}
+
 async function clone(repo, pat='') {
-  const uploadPackUrl = `${repo}/info/refs?service=git-upload-pack`;
+  const uploadPackUrl = proxyUrl(`${repo}/info/refs?service=git-upload-pack`);
 
   const response = await fetch(uploadPackUrl, {
     headers: {
