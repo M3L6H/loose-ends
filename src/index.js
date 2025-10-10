@@ -92,13 +92,15 @@ function createPktLines(lines) {
     
     data.set(idx, toBytes(line));
     idx += len;
+    
+    addLine(`pkt: msgLen: ${msgLen}; line: ${line}`);
   }
   
   return data;
 }
 
 async function gitReq(url, method='GET', headers={}, body) {
-  addLine(`gitReq: url: ${url}; method: ${method}; headers: ${headers}; body: ${body}`);
+  addLine(`gitReq: url: ${url}; method: ${method}; headers: ${JSON.stringify(headers)}; body: ${body}`);
   const response = await fetch(url, {
     headers: {
       'User-Agent': 'git/2.0.0',
