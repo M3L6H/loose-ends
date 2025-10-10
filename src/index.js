@@ -1,39 +1,42 @@
-function parsePktLines(data) {
-  const lines = [];
-  let pos = 0;
-  const buffer = Buffer.from(data);
+const HEX_BASE = 16;
+const PKT_SIZE_BYTE_COUNT = 4;
 
-  while (pos < buffer.length) {
-    if (pos + 4 > buffer.length) break;
+const td = new TextDecoder('utf-8');
+
+function parsePktLines(stream) {
+  const lines = [];
+  let len = null;
+  let s = e = 0;
+  const curr = new Uint8Array(PKT_SIZE_BYTE_COUNT + 0xffff);
   
-    const lenHex = buffer.slice(pos, pos + 4).toString('utf8');
-    const len = parseInt(lenHex, 16);
-  
-    if (len === 0) {
-      pos += 4;
-      continue; // Flush line
+  for await (const chunk of stream) {
+    curr.set(chunk, e);
+    e += chunk.length;
+    
+    if (len === null) {
+      if (e - s < PKT_SIZE_BYTE_COUNT) continue;
+      const d = curr.subarray(s, s + PKT_SIZE_BYTE_COUNT);
+      s += PKT_SIZE_BYTE_COUNT;
+      len = parseInt(td.decode(d), HEX_BASE);
     }
-  
-    if (pos + len > buffer.length) break;
-  
-    const line = buffer.slice(pos + 4, pos + len).toString('utf8').trim();
-  
-    if (line) lines.push(line);
-  
-    pos += len;
+    
+    if (len > 0) {
+      if (e - s < len) continue;
+    
+      const d = curr.subarray(s, s + len);
+      s += len;
+      lines.push(td.decode(d).strip());
+    }
+    
+    // Flush
+    const d = curr.subarray(s, e);
+    curr.set(d, 0);
+    e -= s;
+    s = 0;
+    len = null;
   }
 
   return lines;
-}
-
-function createPktLine(str) {
-  const len = Buffer.byteLength(str) + 4 + (str.endsWith('\n') ? 0 : 1); // Add \n if missing
-  const lenHex = len.toString(16).padStart(4, '0');
-  return Buffer.from(lenHex + (str.endsWith('\n') ? str : str + '\n'));
-}
-
-function createFlush() {
-  return Buffer.from('0000');
 }
 
 function proxyUrl(url) {
