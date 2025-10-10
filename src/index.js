@@ -3,7 +3,7 @@ const PKT_SIZE_BYTE_COUNT = 4;
 
 const td = new TextDecoder('utf-8');
 
-function parsePktLines(stream) {
+async function parsePktLines(stream) {
   const lines = [];
   let len = null;
   let s = e = 0;
@@ -56,9 +56,9 @@ async function clone(repo, pat='') {
     throw new Error(`Response status: ${response.status}`);
   }
 
-  const result = await response.text();
+  const result = await parsePktLines(response.body);
 
-  return parsePktLines(result);
+  return result;
 }
 
 function init() {
