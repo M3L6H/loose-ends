@@ -18,6 +18,7 @@ async function parsePktLines(reader) {
       const chunk = value.subarray(i, curr.length - e);
       curr.set(chunk, e);
       e += chunk.length;
+      lines.push(`s: ${s}; e: ${e}; curr: ${curr}`);
     
       if (len === null) {
         if (e - s < PKT_SIZE_BYTE_COUNT) continue;
@@ -25,6 +26,7 @@ async function parsePktLines(reader) {
         s += PKT_SIZE_BYTE_COUNT;
         len = parseInt(td.decode(d), HEX_BASE);
       }
+      lines.push(`len: ${len}; s: ${s}; e: ${e}; curr: ${curr}`);
 
       if (len > 0) {
         if (e - s < len) continue;
@@ -40,6 +42,7 @@ async function parsePktLines(reader) {
       e -= s;
       s = 0;
       len = null;
+      lines.push(`flush: len: ${len}; s: ${s}; e: ${e}; curr: ${curr}`);
     }
   }
 
