@@ -14,10 +14,11 @@ async function parsePktLines(reader) {
 
     if (done) break;
 
-    for (let i = 0; i < value.length; i += curr.length - e) {
-      const chunk = value.subarray(i, curr.length - e);
+    for (let i = 0; i < value.length; i += 0) {
+      const chunk = value.subarray(i, i + e - s + (len ?? PKT_SIZE_BYTE_COUNT));
       curr.set(chunk, e);
       e += chunk.length;
+      i += chunk.length;
       lines.push(`s: ${s}; e: ${e}; curr: ${curr}`);
     
       if (len === null) {
@@ -77,7 +78,9 @@ function init() {
   clone('https://github.com/M3L6H/loose-ends.git')
     .then(lines => lines.forEach(refs => {
       const textNode = document.createTextNode(refs);
-      document.body.appendChild(textNode);
+      const p = document.createElement('p');
+      p.appendChild(textNode);
+      document.body.appendChild(p);
     })).catch(err => {
       const textNode = document.createTextNode(err.message);
       document.body.appendChild(textNode);
