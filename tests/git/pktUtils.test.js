@@ -1,6 +1,6 @@
-import { parsePktLines } from '@src/git/pktUtil';
+import { parsePktLines } from '@src/git/pktUtils';
 
-describe('pktUtil', () => {
+describe('pktUtils', () => {
   describe('parsePktLines', () => {
     it('should return empty if the reader is empty', () => {
       const stream = new ReadableStream({
