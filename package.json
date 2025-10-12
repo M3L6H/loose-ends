@@ -1,10 +1,11 @@
 {
     "name": "loose-ends",
     "version": "0.1.0",
+    "type": "module",
     "description": "A lean task tracker designed to ensure you tie up all those pesky loose ends",
     "main": "src/index.js",
     "scripts": {
-        "test": "jest"
+        "test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest"
     },
     "keywords": [],
     "author": "M3L6H",
