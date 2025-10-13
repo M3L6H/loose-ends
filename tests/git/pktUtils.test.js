@@ -10,7 +10,7 @@ describe('pktUtils', () => {
         },
       });
 
-      await expect(parsePktLines(stream.getReader())).toResolve().toBeEmpty();
+      await expect(parsePktLines(stream.getReader())).resolves.toBeEmpty();
     });
   });
 });
