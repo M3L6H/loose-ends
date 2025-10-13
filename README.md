@@ -1,4 +1,8 @@
-# loose-ends
+<h1>
+  loose-ends
+  <img align="right" alt="GitHub Actions Workflow Status" src="https://img.shields.io/github/actions/workflow/status/m3l6h/loose-ends/.github%2Fworkflows%2Fpublish.yml?branch=main&label=publish">
+  <img align="right" alt="GitHub License" src="https://img.shields.io/github/license/m3l6h/loose-ends">
+</h1>
 
 loose-ends is a lean, productivity-oriented task tracker designed to ensure you tie up all your loose ends.
 
