@@ -4,6 +4,7 @@ const config = {
     '^@src/(.*)$': '<rootDir>/src/$1',
   },
   resetMocks: true,
+  setupFilesAfterEnv: ['jest-extended/all'],
   transform: {},
 };
 
