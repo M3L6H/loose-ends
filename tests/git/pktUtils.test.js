@@ -19,17 +19,27 @@ describe('pktUtils', () => {
     });
 
     it('should read a line', async () => {
-      const data = [
+      data = [
         // 0 0 0 8 t e s t
         Uint8Array.fromHex('3030303874657374'),
       ];
-      
-      stream = new ReadableStream({
-        start(ctrl) {
-          data.forEach(d => ctrl.enqueue(d));
-          ctrl.close();
-        },
-      });
+
+      await expect(parsePktLines(stream.getReader())).resolves.toEqual([
+        'test',
+      ]);
+    });
+    
+    it('should read a line over multiple chunks', async () => {
+      data = [
+        // 0 0
+        Uint8Array.fromHex('3030'),
+        // 0 8 t
+        Uint8Array.fromHex('303874'),
+        // e s
+        Uint8Array.fromHex('6573'),
+        // t
+        Uint8Array.fromHex('74'),
+      ];
 
       await expect(parsePktLines(stream.getReader())).resolves.toEqual([
         'test',
