@@ -1,3 +1,6 @@
+const HEX_BASE = 16;
+const PKT_SIZE_BYTE_COUNT = 4;
+
 /**
  * Parses the git pkt-line format from a ReadableStream reader.
  *
