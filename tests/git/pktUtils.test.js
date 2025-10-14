@@ -53,5 +53,32 @@ describe('pktUtils', () => {
         'test',
       ]);
     });
+    
+    it('should flush when length is 0', async () => {
+      const data = [
+        // 0 0 0 8 t e s t
+        Uint8Array.fromHex('3030303874657374'),
+        // 0 0 0 0
+        Uint8Array.fromHex('30303030'),
+        // 0 0 0 f a b c d
+        Uint8Array.fromHex('3030306661626364'),
+        // e f g h i j k l m
+        Uint8Array.fromHex('656667686970717273'),
+        // n o p
+        Uint8Array.fromHex('747576'),
+      ];
+      
+      const stream = new ReadableStream({
+        start(ctrl) {
+          data.forEach(d => ctrl.enqueue(d));
+          ctrl.close();
+        },
+      });
+
+      await expect(parsePktLines(stream.getReader())).resolves.toEqual([
+        'test',
+        'abcdefghijklmnop',
+      ]);
+    });
   });
 });
