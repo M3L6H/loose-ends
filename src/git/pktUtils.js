@@ -1,6 +1,8 @@
 const HEX_BASE = 16;
 const PKT_SIZE_BYTE_COUNT = 4;
 
+const td = new TextDecoder('utf-8');
+
 /**
  * Parses the git pkt-line format from a ReadableStream reader.
  *
@@ -32,6 +34,7 @@ export async function parsePktLines(reader) {
         if (e - s < PKT_SIZE_BYTE_COUNT) continue;
         const d = curr.subarray(s, s + PKT_SIZE_BYTE_COUNT);
         s += PKT_SIZE_BYTE_COUNT;
+        console.log(`decoded: ${td.decode(d)}`);
         len = parseInt(td.decode(d), HEX_BASE) - PKT_SIZE_BYTE_COUNT;
         console.log(`len: ${len}`);
       }
