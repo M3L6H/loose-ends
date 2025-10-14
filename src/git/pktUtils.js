@@ -16,7 +16,7 @@ export async function parsePktLines(reader) {
 
     if (done) break;
 
-    for (let i = 0; i < value.length; i += 0) {
+    for (let i = 0; i < value.length;) {
       const chunk = value.subarray(i, i + e - s + (len ?? PKT_SIZE_BYTE_COUNT));
       curr.set(chunk, e);
       e += chunk.length;
