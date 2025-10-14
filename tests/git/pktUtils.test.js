@@ -62,8 +62,8 @@ describe('pktUtils', () => {
         Uint8Array.fromHex('30303030'),
         // 0 0 0 f a b c d
         Uint8Array.fromHex('3030306661626364'),
-        // e f g h i j k l
-        Uint8Array.fromHex('6566676869707172'),
+        // e f g h i j k
+        Uint8Array.fromHex('65666768696a6b'),
       ];
       
       const stream = new ReadableStream({
@@ -75,7 +75,7 @@ describe('pktUtils', () => {
 
       await expect(parsePktLines(stream.getReader())).resolves.toEqual([
         'test',
-        'abcdefghijkl',
+        'abcdefghijk',
       ]);
     });
   });
