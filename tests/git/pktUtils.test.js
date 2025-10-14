@@ -20,8 +20,8 @@ describe('pktUtils', () => {
 
     it('should read a line', async () => {
       const data = [
-        // 0 0 0 4 t e s t
-        Uint8Array.fromHex('3030303474657374'),
+        // 0 0 0 8 t e s t
+        Uint8Array.fromHex('3030303874657374'),
       ];
       
       stream = new ReadableStream({
