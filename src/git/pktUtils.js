@@ -59,7 +59,7 @@ export async function parsePktLines(reader) {
  *
  * @param {string[]} lines - array of lines
  *
- * @returns {Uint8Array} Array of byted
+ * @returns {Uint8Array} Array of bytes
  */
 export function createPktLines(lines) {
   const msgLen = lines.reduce((acc, curr) =>
