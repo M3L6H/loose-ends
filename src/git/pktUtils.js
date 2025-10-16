@@ -53,3 +53,48 @@ export async function parsePktLines(reader) {
 
   return lines;
 }
+
+/**
+ * Converts an array of lines into the git pkt-line format. Empty strings become null bytes.
+ *
+ * @param {string[]} lines - array of lines
+ *
+ * @returns {Uint8Array} Array of byted
+ */
+export function createPktLines(lines) {
+  const msgLen = lines.reduce((acc, curr) =>
+    acc + PKT_SIZE_BYTE_COUNT + curr.length + (curr.length === 0 || curr.endsWith('\n') ? 0 : 1),
+  0);
+  
+  const data = new Uint8Array(msgLen);
+  let idx = 0;
+  
+  for (const line of lines) {
+    if (line === '') {
+      data.set([0, 0, 0, 0], idx);
+      idx += PKT_SIZE_BYTE_COUNT;
+      continue;
+    }
+    
+    if (!line.endsWith('\n')) {
+      line += '\n';
+    }
+    
+    const len = line.length;
+    data.set(lenToBytes(len + PKT_SIZE_BYTE_COUNT), idx);
+    idx += PKT_SIZE_BYTE_COUNT;
+    
+    data.set(toBytes(line), idx);
+    idx += len;
+  }
+  
+  return data;
+}
+
+function toBytes(str) {
+  return Array.from(str).map(c => c.codePointAt(0));
+}
+
+function lenToBytes(len) {
+  return toBytes(len.toString(HEX_BASE).padStart(PKT_SIZE_BYTE_COUNT, '0'));
+}
