@@ -1,4 +1,4 @@
-import { parsePktLines } from '@src/git/pktUtils';
+import { createPktLines, parsePktLines } from '@src/git/pktUtils';
 
 describe('pktUtils', () => {
   describe('parsePktLines', () => {
