@@ -79,4 +79,10 @@ describe('pktUtils', () => {
       ]);
     });
   });
+  
+  describe('createPktLines', () => {
+    it('should return empty for empty array', () => {
+      expect(createPktLines([])).toHaveLength(0);
+    });
+  });
 });
