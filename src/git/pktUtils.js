@@ -69,7 +69,7 @@ export function createPktLines(lines) {
   const data = new Uint8Array(msgLen);
   let idx = 0;
   
-  for (const line of lines) {
+  for (let line of lines) {
     if (line === '') {
       data.set([0, 0, 0, 0], idx);
       idx += PKT_SIZE_BYTE_COUNT;
