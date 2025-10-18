@@ -96,5 +96,23 @@ describe('pktUtils', () => {
       
       await expect(parsePktLines(stream.getReader())).resolves.toEqual([]);
     });
+    
+    it('encodes lines into pkt format', () => {
+      const bytes = createPktLines([
+        'test',
+        'line\n',
+      ]);
+      const stream = new ReadableStream({
+        start(ctrl) {
+          ctrl.enqueue(bytes);
+          ctrl.close();
+        },
+      });
+      
+      await expect(parsePktLines(stream.getReader())).resolves.toEqual([
+        'test',
+        'line',
+      ]);
+    });
   });
 });
