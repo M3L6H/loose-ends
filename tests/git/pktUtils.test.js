@@ -97,7 +97,7 @@ describe('pktUtils', () => {
       await expect(parsePktLines(stream.getReader())).resolves.toEqual([]);
     });
     
-    it('encodes lines into pkt format', () => {
+    it('encodes lines into pkt format', async () => {
       const bytes = createPktLines([
         'test',
         'line\n',
