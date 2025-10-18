@@ -84,5 +84,17 @@ describe('pktUtils', () => {
     it('should return empty for empty array', () => {
       expect(createPktLines([])).toHaveLength(0);
     });
+    
+    it('should return empty for flush', async () => {
+      const bytes = createPktLines(['']);
+      const stream = new ReadableStream({
+        start(ctrl) {
+          ctrl.enqueue(bytes);
+          ctrl.close();
+        },
+      });
+      
+      await expect(parsePktLines(stream.getReader())).resolves.toEqual([]);
+    });
   });
 });
