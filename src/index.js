@@ -59,7 +59,7 @@ async function lsRefs(repo, pat) {
 }
 
 async function clone(repo, pat='') {
-  const capabilities = getCaps(repo, pat);
+  const capabilities = await getCaps(repo, pat);
   capabilities.forEach(cap => {
     addLine(cap);
   });
