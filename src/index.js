@@ -1,4 +1,4 @@
-import { pktUtils } from './git';
+import { pktUtils } from './git/index.js';
 
 function addLine(line) {
   const textNode = document.createTextNode(line);
