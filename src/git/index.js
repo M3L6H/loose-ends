@@ -1,1 +1,1 @@
-export * as pktUtils from './pktUtils';
+export * as pktUtils from './pktUtils.js';
