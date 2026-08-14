@@ -1,0 +1,38 @@
+# yaml-language-server: $schema=http://json-schema.org
+$schema: "http://json-schema.org"
+title: "Event"
+description: "Validation schema for events"
+type: "object"
+properties:
+  event:
+    type: "object"
+    required:
+      - name
+    properties:
+      name:
+        type: "string"
+      date:
+        type: "string"
+        pattern: "\\d{4}-\\d{1,2}-\\d{1,2}(\\s+\\d{1,2}(:\\d{1,2}(:\\d{1,2})?)?)?"
+      description:
+        type: "string"
+      reminders:
+        type: "array"
+        items:
+          type: "string"
+          pattern: "\\d+\\s+\\w+(\\s+before)?"
+      schedule:
+        type: "string"
+        pattern: "\\d+(,\\s*\\d+)*\\s*(/|\\*)\\s*(day|wk|mo|yr)(\\s+\\d{1,2}(:\\d{1,2}(:\\d{1,2})?)?)?"
+      starts:
+        type: "array"
+        items:
+          type: "string"
+      updates:
+        type: "array"
+        items:
+          type: "string"
+      ends:
+        type: "array"
+        items:
+          type: "string"

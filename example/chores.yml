@@ -1,0 +1,8 @@
+event:
+  name: Clean House
+  schedule: 1 / mo # First of each month
+  description: |-
+    Clean my house
+  updates:
+    - chores
+    - party

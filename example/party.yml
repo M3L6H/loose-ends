@@ -1,0 +1,17 @@
+event:
+  name: Party Invite
+  date: 2000-10-28
+  description: |-
+    My best friend invited me to his party
+  starts:
+    - party
+---
+event:
+  name: Party Time
+  date: 2099-03-16
+  description: |-
+    Go to my friend's party
+  reminders:
+    - 1 week
+  finishes:
+    - party

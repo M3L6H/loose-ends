@@ -1,0 +1,16 @@
+event:
+  name: Buy Home
+  date: 1997-02-13 10:22
+  description: |-
+    I bought a home and now there are too many things to do
+  starts:
+    - chores
+    - home
+---
+event:
+  name: Sell Home
+  description: |-
+    One day...
+  ends:
+    - chores
+    - home
