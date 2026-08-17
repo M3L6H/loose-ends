@@ -29,6 +29,13 @@ const SCALES = [
 let canvas;
 let content;
 
+let centeredOn = Date.now();
+let scaleIndex = DEFAULT_SCALE;
+
+let dragging = false;
+let initialCenteredOn = centeredOn;
+let mouseDownPos;
+
 function resizeCanvas() {
   canvas.height = content.clientHeight;
   canvas.width = content.clientWidth;
@@ -40,19 +47,48 @@ function resizeCanvas() {
  * Draw canvas content.
  * @param {number} scaleIndex - Index of scale in {@link SCALES}
  */
-function drawContent(scaleIndex = DEFAULT_SCALE) {
+function drawContent() {
   const ctx = canvas.getContext("2d");
   ctx.fillStyle = BACKGROUND_COLOR;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   const scaleMs = SCALES[scaleIndex] * 1000;
 
-  drawTimeline(ctx, Date.now(), scaleMs);
+  drawTimeline(ctx, centeredOn, scaleMs);
+}
+
+/**
+ * Handle when user clicks on canvas
+ * @param {MouseEvent} event - mouse down event
+ */
+function handleMouseDown(event) {
+  dragging = true;
+  initialCenteredOn = centeredOn;
+  mouseDownPos = { x: event.x, y: event.y };
+}
+
+/**
+ * Handle when user clicks and drags on canvas
+ * @param {MouseEvent} event - mouse move event
+ */
+function handleMouseDrag(event) {
+  if (!dragging) {
+    return;
+  }
+
+  event.preventDefault();
+  centeredOn =
+    initialCenteredOn + (mouseDownPos.x - event.x) * SCALES[scaleIndex] * 100;
+  drawContent();
 }
 
 export function init() {
   canvas = document.getElementById("canvas");
   content = document.getElementById("content");
+
+  canvas.addEventListener("mousedown", handleMouseDown);
+  canvas.addEventListener("mouseup", () => (dragging = false));
+  canvas.addEventListener("mousemove", handleMouseDrag);
 
   window.addEventListener("resize", resizeCanvas);
 
