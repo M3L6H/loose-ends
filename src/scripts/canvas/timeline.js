@@ -15,6 +15,7 @@ const TICK_WIDTH = TIMELINE_THICKNESS;
  * @param {number} scaleMs - Scale (in ms) to render the timeline at
  */
 export function drawTimeline(ctx, centeredOn, scaleMs) {
+  ctx.save();
   const width = ctx.canvas.width;
   const halfWidth = width / 2;
 
@@ -34,7 +35,7 @@ export function drawTimeline(ctx, centeredOn, scaleMs) {
     tickTime += scaleMs;
   }
 
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.restore();
 }
 
 /**
