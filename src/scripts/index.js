@@ -1,1 +1,1 @@
-export * as canvas from "./canvas.js";
+export * as canvas from "./canvas/index.js";
