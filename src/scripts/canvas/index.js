@@ -37,12 +37,8 @@ let initialCenteredOn = centeredOn;
 let mouseDownPos;
 
 function resizeCanvas() {
-  const dpr = window.devicePixelRatio || 1;
-  canvas.height = content.clientHeight * dpr;
-  canvas.width = content.clientWidth * dpr; 
-
-  const ctx = canvas.getContext('2d');
-  ctx.scale(dpr, dpr);
+  canvas.height = content.clientHeight;
+  canvas.width = content.clientWidth; 
 
   drawContent();
 }
