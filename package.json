@@ -5,7 +5,7 @@
     "description": "A lean task tracker designed to ensure you tie up all those pesky loose ends",
     "main": "src/index.js",
     "scripts": {
-        "test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest"
+        "test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest --passWithNoTests"
     },
     "keywords": [],
     "author": "M3L6H",
