@@ -17,5 +17,8 @@ function drawContent() {
 export function init() {
   canvas = document.getElementById("canvas");
   content = document.getElementById("content");
-  window.addEventListener("resize", resizeCanvas());
+
+  window.addEventListener("resize", resizeCanvas);
+
+  resizeCanvas();
 }
