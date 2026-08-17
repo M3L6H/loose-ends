@@ -1,6 +1,8 @@
 import { BACKGROUND_COLOR } from "./colors.js";
 import { drawTimeline } from "./timeline.js";
 
+const SCROLL_SPEED = 50;
+
 const DEFAULT_SCALE = 8;
 // Defines a list of predefined scales where each entry is the number of seconds per unit on the
 // timeline
@@ -31,15 +33,18 @@ let content;
 
 let centeredOn = Date.now();
 let scaleIndex = DEFAULT_SCALE;
+let scaleMs = SCALES[scaleIndex] * 1000;
 
 let dragging = false;
 let initialCenteredOn = centeredOn;
-let mouseDownPos;
+let pointerDownPos;
 
 function resizeCanvas() {
-  canvas.height = content.clientHeight;
-  canvas.width = content.clientWidth; 
+  const dpr = window.devicePixelRatio || 1;
+  canvas.height = content.clientHeight * dpr;
+  canvas.width = content.clientWidth * dpr;
 
+  canvas.getContext("2d").scale(dpr, dpr);
   drawContent();
 }
 
@@ -52,33 +57,31 @@ function drawContent() {
   ctx.fillStyle = BACKGROUND_COLOR;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  const scaleMs = SCALES[scaleIndex] * 1000;
-
   drawTimeline(ctx, centeredOn, scaleMs);
 }
 
 /**
  * Handle when user clicks on canvas
- * @param {MouseEvent} event - mouse down event
+ * @param {PointerEvent} event - pointer down event
  */
-function handleMouseDown(event) {
+function handlePointerDown(event) {
   dragging = true;
   initialCenteredOn = centeredOn;
-  mouseDownPos = { x: event.x, y: event.y };
+  pointerDownPos = { x: event.clientX, y: event.clientY };
 }
 
 /**
  * Handle when user clicks and drags on canvas
- * @param {MouseEvent} event - mouse move event
+ * @param {PointerEvent} event - pointer move event
  */
-function handleMouseDrag(event) {
+function handlePointerDrag(event) {
   if (!dragging) {
     return;
   }
 
   event.preventDefault();
-  centeredOn =
-    initialCenteredOn + (mouseDownPos.x - event.x) * SCALES[scaleIndex] * 100;
+  const diff = pointerDownPos.x - event.clientX;
+  centeredOn = initialCenteredOn + diff * SCALES[scaleIndex] * SCROLL_SPEED;
   drawContent();
 }
 
@@ -86,12 +89,9 @@ export function init() {
   canvas = document.getElementById("canvas");
   content = document.getElementById("content");
 
-  canvas.addEventListener("mousedown", handleMouseDown);
-  canvas.addEventListener("mouseup", () => (dragging = false));
-  canvas.addEventListener("mousemove", handleMouseDrag);
-  canvas.addEventListener("touchstart", handleMouseDown);
-  canvas.addEventListener("touchend", () => (dragging = false));
-  canvas.addEventListener("touchmove", handleMouseDrag);
+  canvas.addEventListener("pointerdown", handlePointerDown);
+  canvas.addEventListener("pointerup", () => (dragging = false));
+  canvas.addEventListener("pointermove", handlePointerDrag);
 
   window.addEventListener("resize", resizeCanvas);
 

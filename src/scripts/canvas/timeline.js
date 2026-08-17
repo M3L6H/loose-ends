@@ -1,10 +1,11 @@
 import { TIMELINE_COLOR, TIMELINE_TEXT_COLOR } from "./colors.js";
 
-const TIMELINE_THICKNESS = 4;
-const TIMELINE_V_OFFSET = 32;
+const TIMELINE_THICKNESS = 2;
+const TIMELINE_V_OFFSET = 16;
 
-const TICK_HEIGHT = 16;
-const TICK_OFFSET = 64;
+const TICK_FONT_SIZE = 8;
+const TICK_HEIGHT = 8;
+const TICK_OFFSET = 48;
 const TICK_WIDTH = TIMELINE_THICKNESS;
 
 /**
@@ -48,6 +49,7 @@ export function drawTimeline(ctx, centeredOn, scaleMs) {
 function drawTick(ctx, tickTime, scaleMs) {
   drawCenteredRect(ctx, TICK_WIDTH, TICK_HEIGHT, TIMELINE_COLOR);
   ctx.textAlign = "center";
+  ctx.font = `${TICK_FONT_SIZE}px serif`;
   ctx.fillStyle = TIMELINE_TEXT_COLOR;
   ctx.fillText(formatTickTime(tickTime, scaleMs), 0, -TICK_HEIGHT);
 }
