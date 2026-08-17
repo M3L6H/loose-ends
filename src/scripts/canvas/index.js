@@ -89,6 +89,9 @@ export function init() {
   canvas.addEventListener("mousedown", handleMouseDown);
   canvas.addEventListener("mouseup", () => (dragging = false));
   canvas.addEventListener("mousemove", handleMouseDrag);
+  canvas.addEventListener("touchstart", handleMouseDown);
+  canvas.addEventListener("touchend", () => (dragging = false));
+  canvas.addEventListener("touchmove", handleMouseDrag);
 
   window.addEventListener("resize", resizeCanvas);
 
