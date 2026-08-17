@@ -1,4 +1,4 @@
-import { TIMELINE_COLOR } from "./colors.js";
+import { TIMELINE_COLOR, TIMELINE_TEXT_COLOR } from "./colors.js";
 
 const TIMELINE_THICKNESS = 4;
 const TIMELINE_V_OFFSET = 32;
@@ -11,9 +11,10 @@ const TICK_WIDTH = TIMELINE_THICKNESS;
  * Draw the timeline element on the canvas.
  *
  * @param {CanvasRenderingContext2D } ctx - Canvas context
- * @param {number} scale - Scale to render the canvas at
+ * @param {number} centeredOn - Epoch timestamp to center on
+ * @param {number} scaleMs - Scale (in ms) to render the timeline at
  */
-export function drawTimeline(ctx, scale) {
+export function drawTimeline(ctx, centeredOn, scaleMs) {
   const width = ctx.canvas.width;
   const halfWidth = width / 2;
 
@@ -21,14 +22,16 @@ export function drawTimeline(ctx, scale) {
   ctx.translate(halfWidth, TIMELINE_V_OFFSET);
   drawCenteredRect(ctx, width, TIMELINE_THICKNESS);
 
-  const halfNumTicks = Math.floor(halfWidth / TICK_OFFSET);
+  const halfNumTicks = Math.floor(halfWidth / TICK_OFFSET) + 1;
   const numTicks = halfNumTicks * 2;
 
+  let tickTime = centeredOn - scaleMs * halfNumTicks;
   ctx.translate(-halfNumTicks * TICK_OFFSET, 0);
 
   for (let i = 0; i <= numTicks; ++i) {
-    drawTick(ctx);
+    drawTick(ctx, tickTime, scaleMs);
     ctx.translate(TICK_OFFSET, 0);
+    tickTime += scaleMs;
   }
 
   ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -38,9 +41,55 @@ export function drawTimeline(ctx, scale) {
  * Draw a "tick" on the timeline
  *
  * @param {CanvasRenderingContext2D } ctx - Canvas context
+ * @param {number} tickTime - Epoch timestamp of the tick
+ * @param {number} scaleMs - Scale used to format {@link tickTime}
  */
-function drawTick(ctx) {
+function drawTick(ctx, tickTime, scaleMs) {
   drawCenteredRect(ctx, TICK_WIDTH, TICK_HEIGHT, TIMELINE_COLOR);
+  ctx.textAlign = "center";
+  ctx.fillStyle = TIMELINE_TEXT_COLOR;
+  ctx.fillText(formatTickTime(tickTime, scaleMs), 0, -TICK_HEIGHT);
+}
+
+const MINUTE_AND_SECOND_FORMAT = new Intl.DateTimeFormat("en-US", {
+  hourCycle: "h24",
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit",
+});
+
+const HOUR_AND_MINUTE_FORMAT = new Intl.DateTimeFormat("en-US", {
+  hour: "2-digit",
+  minute: "2-digit",
+});
+
+const WEEKDAY = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  weekday: "short",
+  day: "2-digit",
+});
+
+const DAY = new Intl.DateTimeFormat("en-US", {
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
+/**
+ * Format the tickTime given a scale
+ *
+ * @param {number} tickTime - Epoch timestamp of the tick
+ * @param {number} scaleMs - Scale used to format {@link tickTime}
+ */
+function formatTickTime(tickTime, scaleMs) {
+  if (scaleMs < 3600000) {
+    return MINUTE_AND_SECOND_FORMAT.format(tickTime);
+  } else if (scaleMs < 86400000) {
+    return HOUR_AND_MINUTE_FORMAT.format(tickTime);
+  } else if (scaleMs < 604800000) {
+    return WEEKDAY.format(tickTime);
+  }
+  return DAY.format(tickTime);
 }
 
 /**

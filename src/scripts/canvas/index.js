@@ -45,9 +45,9 @@ function drawContent(scaleIndex = DEFAULT_SCALE) {
   ctx.fillStyle = BACKGROUND_COLOR;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  const scale = SCALES[scaleIndex];
+  const scaleMs = SCALES[scaleIndex] * 1000;
 
-  drawTimeline(ctx, scale);
+  drawTimeline(ctx, Date.now(), scaleMs);
 }
 
 export function init() {
