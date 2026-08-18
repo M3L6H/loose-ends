@@ -1,4 +1,5 @@
 import { BACKGROUND_COLOR } from "./colors.js";
+import { drawGrid } from "./grid.js";
 import { drawTimeline } from "./timeline.js";
 
 const SCROLL_SPEED = 50;
@@ -58,6 +59,7 @@ function drawContent() {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   drawTimeline(ctx, centeredOn, scaleMs);
+  drawGrid(ctx);
 }
 
 /**

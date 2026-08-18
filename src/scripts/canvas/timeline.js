@@ -1,12 +1,26 @@
 import { TIMELINE_COLOR, TIMELINE_TEXT_COLOR } from "./colors.js";
+import { getGridSpacing } from "./grid.js";
 
+const TIMELINE_BOTTOM_MARGIN = 16;
 const TIMELINE_THICKNESS = 2;
-const TIMELINE_V_OFFSET = 16;
+const TIMELINE_V_OFFSET = 24;
 
-const TICK_FONT_SIZE = 8;
+const TICK_FONT_SIZE = 10;
 const TICK_HEIGHT = 8;
-const TICK_OFFSET = 48;
 const TICK_WIDTH = TIMELINE_THICKNESS;
+
+/**
+ * Get the vertical space that should be reserved for the timeline
+ * @returns {number} space reserved for timeline at the top of the canvas
+ */
+export function getTimelineSpace() {
+  return (
+    TIMELINE_V_OFFSET +
+    TIMELINE_THICKNESS +
+    TICK_HEIGHT +
+    TIMELINE_BOTTOM_MARGIN
+  );
+}
 
 /**
  * Draw the timeline element on the canvas.
@@ -24,15 +38,15 @@ export function drawTimeline(ctx, centeredOn, scaleMs) {
   ctx.translate(halfWidth, TIMELINE_V_OFFSET);
   drawCenteredRect(ctx, width, TIMELINE_THICKNESS);
 
-  const halfNumTicks = Math.floor(halfWidth / TICK_OFFSET) + 1;
+  const halfNumTicks = Math.floor(halfWidth / getGridSpacing()) + 1;
   const numTicks = halfNumTicks * 2;
 
   let tickTime = centeredOn - scaleMs * halfNumTicks;
-  ctx.translate(-halfNumTicks * TICK_OFFSET, 0);
+  ctx.translate(-halfNumTicks * getGridSpacing(), 0);
 
   for (let i = 0; i <= numTicks; ++i) {
     drawTick(ctx, tickTime, scaleMs);
-    ctx.translate(TICK_OFFSET, 0);
+    ctx.translate(getGridSpacing(), 0);
     tickTime += scaleMs;
   }
 
