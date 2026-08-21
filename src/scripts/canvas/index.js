@@ -1,4 +1,5 @@
 import { BACKGROUND_COLOR } from "./colors.js";
+import { drawEvents } from "./events.js";
 import { drawGrid } from "./grid.js";
 import { drawTimeline } from "./timeline.js";
 
@@ -65,6 +66,7 @@ function drawContent() {
 
   drawTimeline(ctx, centeredOn, scaleMs);
   drawGrid(ctx);
+  drawEvents(ctx, centeredOn, scaleMs);
 }
 
 /**

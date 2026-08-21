@@ -70,6 +70,26 @@ export function applyAcrossGrid(fn, ctx, startingY, numRows = 1) {
 }
 
 /**
+ * Call draw fn at point on grid
+ *
+ * @param {Function} fn - The function to apply
+ * @param {CanvasRenderingContext2D } ctx - Canvas context
+ * @param {number} x - The grid column to draw in
+ * @param {number} y - The grid row to draw in
+ */
+export function drawAtGridPoint(fn, ctx, x, y) {
+  const [halfNumCols, _] = getNumCols(ctx);
+
+  ctx.save();
+  ctx.translate(
+    getCanvasWidth(ctx) / 2 + (x - halfNumCols) * GRID_SPACING,
+    getTimelineSpace() + y * GRID_SPACING,
+  );
+  fn();
+  ctx.restore();
+}
+
+/**
  * Draw a grid on the canvas.
  *
  * @param {CanvasRenderingContext2D } ctx - Canvas context

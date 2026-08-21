@@ -552,6 +552,7 @@ const COLORS = {
 };
 
 export const BACKGROUND_COLOR = COLORS.background.dark.color;
+export const EVENT_COLOR = COLORS.primary.dark.color;
 export const GRID_COLOR = COLORS.outline_variant.dark.color;
 export const TIMELINE_COLOR = COLORS.secondary.dark.color;
 export const TIMELINE_TEXT_COLOR = COLORS.on_background.dark.color;
