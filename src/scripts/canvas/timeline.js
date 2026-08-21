@@ -1,5 +1,5 @@
 import { TIMELINE_COLOR, TIMELINE_TEXT_COLOR } from "./colors.js";
-import { getGridSpacing } from "./grid.js";
+import { applyAcrossGrid, getGridSpacing, getNumCols } from "./grid.js";
 
 const TIMELINE_BOTTOM_MARGIN = 16;
 const TIMELINE_THICKNESS = 2;
@@ -30,27 +30,45 @@ export function getTimelineSpace() {
  * @param {number} scaleMs - Scale (in ms) to render the timeline at
  */
 export function drawTimeline(ctx, centeredOn, scaleMs) {
-  ctx.save();
+  drawTimelineLine(ctx);
+  drawTicks(ctx, centeredOn, scaleMs);
+}
+
+/**
+ * Draw the "line" for the timeline
+ *
+ * @param {CanvasRenderingContext2D } ctx - Canvas context
+ */
+function drawTimelineLine(ctx) {
   const width = ctx.canvas.width;
   const halfWidth = width / 2;
 
+  ctx.save();
   ctx.fillStyle = TIMELINE_COLOR;
   ctx.translate(halfWidth, TIMELINE_V_OFFSET);
   drawCenteredRect(ctx, width, TIMELINE_THICKNESS);
-
-  const halfNumTicks = Math.floor(halfWidth / getGridSpacing()) + 1;
-  const numTicks = halfNumTicks * 2;
-
-  let tickTime = centeredOn - scaleMs * halfNumTicks;
-  ctx.translate(-halfNumTicks * getGridSpacing(), 0);
-
-  for (let i = 0; i <= numTicks; ++i) {
-    drawTick(ctx, tickTime, scaleMs);
-    ctx.translate(getGridSpacing(), 0);
-    tickTime += scaleMs;
-  }
-
   ctx.restore();
+}
+
+/**
+ * Draw the ticks on the timeline
+ *
+ * @param {CanvasRenderingContext2D } ctx - Canvas context
+ * @param {number} centeredOn - Epoch timestamp to center on
+ * @param {number} scaleMs - Scale (in ms) to render the tick labels at
+ */
+function drawTicks(ctx, centeredOn, scaleMs) {
+  const [halfNumCols, _] = getNumCols(ctx);
+  let tickTime = centeredOn - scaleMs * halfNumCols;
+
+  applyAcrossGrid(
+    () => {
+      drawTick(ctx, tickTime, scaleMs);
+      tickTime += scaleMs;
+    },
+    ctx,
+    TIMELINE_V_OFFSET,
+  );
 }
 
 /**
@@ -62,10 +80,21 @@ export function drawTimeline(ctx, centeredOn, scaleMs) {
  */
 function drawTick(ctx, tickTime, scaleMs) {
   drawCenteredRect(ctx, TICK_WIDTH, TICK_HEIGHT, TIMELINE_COLOR);
+  const labelText = formatTickTime(tickTime, scaleMs);
+  drawTickLabel(ctx, labelText);
+}
+
+/**
+ * Draw a "tick" on the timeline
+ *
+ * @param {CanvasRenderingContext2D } ctx - Canvas context
+ * @param {string} labelText - Text of the label
+ */
+function drawTickLabel(ctx, labelText) {
   ctx.textAlign = "center";
   ctx.font = `${TICK_FONT_SIZE}px serif`;
   ctx.fillStyle = TIMELINE_TEXT_COLOR;
-  ctx.fillText(formatTickTime(tickTime, scaleMs), 0, -TICK_HEIGHT);
+  ctx.fillText(labelText, 0, -TICK_HEIGHT);
 }
 
 const MINUTE_AND_SECOND_FORMAT = new Intl.DateTimeFormat("en-US", {
