@@ -1,4 +1,4 @@
-import { getEvents } from "../events/index.js";
+import { getEvents, isTimelineEnd, isTimelineStart } from "../events/index.js";
 import { EVENT_COLOR } from "./colors.js";
 import { drawAtGridPoint } from "./grid.js";
 import { getStartAndEndTimes } from "./timeline.js";
@@ -14,10 +14,15 @@ const EVENT_DOT_RADIUS = 6;
  */
 export function drawEvents(ctx, centeredOn, scaleMs) {
   const [startTime, endTime] = getStartAndEndTimes(ctx, centeredOn, scaleMs);
-  const visibleEvents = selectVisibleEvents(getEvents(), startTime, endTime);
-  const priorityByTimeline = prioritizeTimelines(
-    extractTimelines(visibleEvents),
+  const events = getEvents();
+  const timestampsByTimeline = extractTimestampsByTimeline(events);
+  const visibleTimelines = selectVisibleTimelines(
+    timestampsByTimeline,
+    startTime,
+    endTime,
   );
+  const priorityByTimeline = prioritizeTimelines(visibleTimelines);
+  const visibleEvents = selectVisibleEvents(events, startTime, endTime);
   visibleEvents.forEach((event) =>
     drawEvent(ctx, event, priorityByTimeline, scaleMs, startTime),
   );
@@ -72,16 +77,25 @@ function getPrimaryTimeline(event, priorityByTimeline) {
 }
 
 /**
- * Extract the timelines touched by the events.
+ * Extract the timelines touched by the events with their start and end timestamps.
  *
  * @param {Event[]} events - Events to search
  */
-function extractTimelines(events) {
-  const timelinesSet = new Set();
-  events.forEach(({ timelines }) =>
-    Object.keys(timelines).forEach((t) => timelinesSet.add(t)),
-  );
-  return timelinesSet;
+function extractTimestampsByTimeline(events) {
+  const timestampsByTimeline = {};
+  events.forEach((event) => {
+    const { timestamp, timelines } = event;
+    for (const timeline in timelines) {
+      const timestamps = timestampsByTimeline[timeline] ?? {};
+      if (!timestamps.start) {
+        timestamps.start = isTimelineStart(event, timeline) ? timestamp : null;
+      } else if (!timestamps.end) {
+        timestamps.end = isTimelineEnd(event, timeline) ? timestamp : null;
+      }
+      timestampsByTimeline[timeline] = timestamps;
+    }
+  });
+  return timestampsByTimeline;
 }
 
 /**
@@ -97,6 +111,29 @@ function prioritizeTimelines(timelines) {
     ++currPriority;
   });
   return priorityByTimeline;
+}
+
+/**
+ * Filter the map of timelines down to the list of visible timelines.
+ *
+ * @param {object} timestampsByTimeline - Timelines to filter
+ * @param {number} startTime - Epoch timestamp of timeframe start
+ * @param {number} endTime - Epoch timestamp of timeframe end
+ */
+function selectVisibleTimelines(timestampsByTimeline, startTime, endTime) {
+  const selectedTimelines = [];
+  for (const timeline in timestampsByTimeline) {
+    const { start, end } = timestampsByTimeline[timeline];
+    const startsAfter = !!start && start > endTime;
+    const endsBefore = !!end && end < startTime;
+
+    if (startsAfter || endsBefore) {
+      continue;
+    }
+
+    selectedTimelines.push(timeline);
+  }
+  return selectedTimelines;
 }
 
 /**

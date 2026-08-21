@@ -1,5 +1,9 @@
 import { getTimeZone } from "../settings/index.js";
 
+const START = "start";
+const UPDATE = "update";
+const END = "end";
+
 /**
  * @typedef {Object} Event
  * @property {string} name - The name of the event
@@ -17,7 +21,7 @@ let events = [
       day: 17,
     },
     timelines: {
-      "My Test": "create",
+      "My Test": START,
     },
   },
   {
@@ -29,11 +33,31 @@ let events = [
       day: 21,
     },
     timelines: {
-      "My Test": "update",
-      "Other Stuff": "create",
+      "My Test": UPDATE,
+      "Other Stuff": START,
     },
   },
 ];
+
+/**
+ * Returns whether the event is the start of the given timeline.
+ *
+ * @param {Event} event - The event to check
+ * @param {string} timeline - The timeline in question
+ */
+export function isTimelineStart(event, timeline) {
+  return (event.timelines ?? {})[timeline] === START;
+}
+
+/**
+ * Returns whether the event is the end of the given timeline.
+ *
+ * @param {Event} event - The event to check
+ * @param {string} timeline - The timeline in question
+ */
+export function isTimelineEnd(event, timeline) {
+  return (event.timelines ?? {})[timeline] === END;
+}
 
 /**
  * Get the complete list of events.

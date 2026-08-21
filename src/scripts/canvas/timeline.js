@@ -1,4 +1,3 @@
-import { getTimeZone } from "../settings/index.js";
 import { TIMELINE_COLOR, TIMELINE_TEXT_COLOR } from "./colors.js";
 import { applyAcrossGrid, getNumCols } from "./grid.js";
 
@@ -6,6 +5,7 @@ const TIMELINE_BOTTOM_MARGIN = 16;
 const TIMELINE_THICKNESS = 2;
 const TIMELINE_V_OFFSET = 24;
 
+const TICK_FONT = "Tahoma, Segoe UI, sans-serif";
 const TICK_FONT_SIZE = 10;
 const TICK_HEIGHT = 8;
 const TICK_WIDTH = TIMELINE_THICKNESS;
@@ -109,7 +109,7 @@ function drawTick(ctx, tickTime, scaleMs) {
  */
 function drawTickLabel(ctx, labelText) {
   ctx.textAlign = "center";
-  ctx.font = `${TICK_FONT_SIZE}px serif`;
+  ctx.font = `${TICK_FONT_SIZE}px ${TICK_FONT}`;
   ctx.fillStyle = TIMELINE_TEXT_COLOR;
   ctx.fillText(labelText, 0, -TICK_HEIGHT);
 }

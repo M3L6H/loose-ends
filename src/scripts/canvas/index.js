@@ -91,8 +91,14 @@ function handlePointerDrag(event) {
 
   event.preventDefault();
   const diff = pointerDownPos.x - event.clientX;
-  centeredOn = initialCenteredOn + diff * SCALES[scaleIndex] * SCROLL_SPEED;
-  drawContent();
+  const scale = SCALES[scaleIndex];
+  centeredOn = initialCenteredOn + diff * scale * SCROLL_SPEED;
+
+  if (Math.abs(centeredOn - initialCenteredOn) > scale * 1000) {
+    drawContent();
+    initialCenteredOn = centeredOn;
+    pointerDownPos.x = event.clientX;
+  }
 }
 
 export function init() {
