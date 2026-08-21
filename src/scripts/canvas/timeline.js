@@ -1,5 +1,6 @@
+import { getTimeZone } from "../settings/index.js";
 import { TIMELINE_COLOR, TIMELINE_TEXT_COLOR } from "./colors.js";
-import { applyAcrossGrid, getGridSpacing, getNumCols } from "./grid.js";
+import { applyAcrossGrid, getNumCols } from "./grid.js";
 
 const TIMELINE_BOTTOM_MARGIN = 16;
 const TIMELINE_THICKNESS = 2;
@@ -20,6 +21,22 @@ export function getTimelineSpace() {
     TICK_HEIGHT +
     TIMELINE_BOTTOM_MARGIN
   );
+}
+
+/**
+ * Get the start and end times of the visible interval
+ *
+ * @param {CanvasRenderingContext2D } ctx - Canvas context
+ * @param {number} centeredOn - Epoch timestamp the view is centered on
+ * @param {number} scaleMs - Scale (in ms) the view is rendered at
+ *
+ * @returns {number[]} [startTime, endTime]
+ */
+export function getStartAndEndTimes(ctx, centeredOn, scaleMs) {
+  const [halfCols, _] = getNumCols(ctx);
+  const startTime = centeredOn - scaleMs * halfCols;
+  const endTime = centeredOn + scaleMs * halfCols;
+  return [startTime, endTime];
 }
 
 /**
@@ -58,8 +75,8 @@ function drawTimelineLine(ctx) {
  * @param {number} scaleMs - Scale (in ms) to render the tick labels at
  */
 function drawTicks(ctx, centeredOn, scaleMs) {
-  const [halfNumCols, _] = getNumCols(ctx);
-  let tickTime = centeredOn - scaleMs * halfNumCols;
+  const [startTime, _] = getStartAndEndTimes(ctx, centeredOn, scaleMs);
+  let tickTime = startTime;
 
   applyAcrossGrid(
     () => {
@@ -128,14 +145,16 @@ const DAY = new Intl.DateTimeFormat("en-US", {
  * @param {number} scaleMs - Scale used to format {@link tickTime}
  */
 function formatTickTime(tickTime, scaleMs) {
+  let formatter = DAY;
   if (scaleMs < 3600000) {
-    return MINUTE_AND_SECOND_FORMAT.format(tickTime);
+    formatter = MINUTE_AND_SECOND_FORMAT;
   } else if (scaleMs < 86400000) {
-    return HOUR_AND_MINUTE_FORMAT.format(tickTime);
+    formatter = HOUR_AND_MINUTE_FORMAT;
   } else if (scaleMs < 604800000) {
-    return WEEKDAY.format(tickTime);
+    formatter = WEEKDAY;
   }
-  return DAY.format(tickTime);
+
+  return formatter.format(tickTime);
 }
 
 /**

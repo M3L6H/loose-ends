@@ -7,7 +7,7 @@ const GRID_SPACING = 64;
 /**
  * Get the current height of the canvas after scaling
  *
- * @param {CanvasRenderingContext2D } ctx - Canvas context
+ * @param {CanvasRenderingContext2D} ctx - Canvas context
  */
 export function getCanvasHeight(ctx) {
   return ctx.canvas.height / ctx.getTransform().a;
@@ -16,7 +16,7 @@ export function getCanvasHeight(ctx) {
 /**
  * Get the current width of the canvas after scaling
  *
- * @param {CanvasRenderingContext2D } ctx - Canvas context
+ * @param {CanvasRenderingContext2D} ctx - Canvas context
  */
 export function getCanvasWidth(ctx) {
   return ctx.canvas.width / ctx.getTransform().a;
@@ -32,7 +32,7 @@ export function getGridSpacing() {
 /**
  * Get the number of columns that fit in the canvas
  *
- * @param {CanvasRenderingContext2D } ctx - Canvas context
+ * @param {CanvasRenderingContext2D} ctx - Canvas context
  *
  * @returns {number[]} [halfCols, cols];
  */
@@ -48,7 +48,7 @@ export function getNumCols(ctx) {
  * Apply fn across the grid
  *
  * @param {Function} fn - The function to apply
- * @param {CanvasRenderingContext2D } ctx - Canvas context
+ * @param {CanvasRenderingContext2D} ctx - Canvas context
  * @param {number} startingY - The y position on the canvas to start at
  * @param {number} numRows - The number of rows to iterate over
  */

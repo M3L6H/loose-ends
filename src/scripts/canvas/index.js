@@ -1,3 +1,4 @@
+import { getTimeZone } from "../settings/index.js";
 import { BACKGROUND_COLOR } from "./colors.js";
 import { drawEvents } from "./events.js";
 import { drawGrid } from "./grid.js";
@@ -33,7 +34,7 @@ const SCALES = [
 let canvas;
 let content;
 
-let centeredOn = Date.now();
+let centeredOn = Temporal.Now.zonedDateTimeISO(getTimeZone()).epochMilliseconds;
 let scaleIndex = DEFAULT_SCALE;
 let scaleMs = SCALES[scaleIndex] * 1000;
 

@@ -1,3 +1,5 @@
+import { getTimeZone } from "../settings/index.js";
+
 /**
  * @typedef {Object} Event
  * @property {string} name - The name of the event
@@ -8,14 +10,24 @@
 let events = [
   {
     name: "Test",
-    date: "2026-08-17",
+    date: {
+      timeZone: getTimeZone(),
+      year: 2026,
+      month: 8,
+      day: 17,
+    },
     timelines: {
       "My Test": "create",
     },
   },
   {
     name: "Other",
-    date: "2026-08-21",
+    date: {
+      timeZone: getTimeZone(),
+      year: 2026,
+      month: 8,
+      day: 21,
+    },
     timelines: {
       "My Test": "update",
       "Other Stuff": "create",
@@ -31,6 +43,6 @@ let events = [
 export function getEvents() {
   return events.map((event) => ({
     ...event,
-    timestamp: Date.parse(event.date),
+    timestamp: Temporal.ZonedDateTime.from(event.date).epochMilliseconds,
   }));
 }
