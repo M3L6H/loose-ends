@@ -57,11 +57,7 @@ export function applyAcrossGrid(fn, ctx, startingY, numRows = 1) {
   const gridSpacing = getGridSpacing();
 
   ctx.save();
-  ctx.translate(
-    getCanvasWidth(ctx) / 2,
-    // ctx.canvas.width / 2 /* - halfNumCols * gridSpacing*/,
-    startingY,
-  );
+  ctx.translate(getCanvasWidth(ctx) / 2 - halfNumCols * gridSpacing, startingY);
 
   for (let i = 0; i < numRows; ++i) {
     for (let j = 0; j < numCols; ++j) {

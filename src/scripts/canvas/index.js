@@ -42,10 +42,15 @@ let pointerDownPos;
 
 function resizeCanvas() {
   const dpr = window.devicePixelRatio || 1;
-  canvas.height = content.clientHeight * dpr;
-  canvas.width = content.clientWidth * dpr;
+
+  canvas.height = Math.floor(content.clientHeight * dpr);
+  canvas.width = Math.floor(content.clientWidth * dpr);
+
+  canvas.style.height = `${content.clientHeight}px`;
+  canvas.style.width = `${content.clientWidth}px`;
 
   canvas.getContext("2d").scale(dpr, dpr);
+
   drawContent();
 }
 
