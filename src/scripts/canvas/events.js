@@ -16,12 +16,14 @@ export function drawEvents(ctx, centeredOn, scaleMs) {
   const [startTime, endTime] = getStartAndEndTimes(ctx, centeredOn, scaleMs);
   const events = getEvents();
   const timestampsByTimeline = extractTimestampsByTimeline(events);
-  const visibleTimelines = selectVisibleTimelines(
+  const tsByVisibleTimeline = selectVisibleTimelines(
     timestampsByTimeline,
     startTime,
     endTime,
   );
-  const priorityByTimeline = prioritizeTimelines(visibleTimelines);
+  const priorityByTimeline = prioritizeTimelines(
+    Object.keys(tsByVisibleTimeline),
+  );
   const visibleEvents = selectVisibleEvents(events, startTime, endTime);
   visibleEvents.forEach((event) =>
     drawEvent(ctx, event, priorityByTimeline, scaleMs, startTime),
@@ -84,18 +86,35 @@ function getPrimaryTimeline(event, priorityByTimeline) {
 function extractTimestampsByTimeline(events) {
   const timestampsByTimeline = {};
   events.forEach((event) => {
-    const { timestamp, timelines } = event;
-    for (const timeline in timelines) {
+    for (const timeline in event.timelines) {
       const timestamps = timestampsByTimeline[timeline] ?? {};
-      if (!timestamps.start) {
-        timestamps.start = isTimelineStart(event, timeline) ? timestamp : null;
-      } else if (!timestamps.end) {
-        timestamps.end = isTimelineEnd(event, timeline) ? timestamp : null;
-      }
-      timestampsByTimeline[timeline] = timestamps;
+      timestampsByTimeline[timeline] = updateTimestampsForTimeline(
+        event,
+        timeline,
+        timestamps,
+      );
     }
   });
   return timestampsByTimeline;
+}
+
+/**
+ * Updates and returns the passed timestamps if event starts/ends the given timeline.
+ *
+ * @param {Event} event - The event in question
+ * @param {string} timeline - The timeline to check
+ * @param {object} timestamps - Object to update containing start/end timestamps
+ */
+function updateTimestampsForTimeline(event, timeline, timestamps) {
+  const { timestamp } = event;
+
+  if (!timestamps.start) {
+    timestamps.start = isTimelineStart(event, timeline) ? timestamp : null;
+  } else if (!timestamps.end) {
+    timestamps.end = isTimelineEnd(event, timeline) ? timestamp : null;
+  }
+
+  return timestamps;
 }
 
 /**
@@ -121,9 +140,10 @@ function prioritizeTimelines(timelines) {
  * @param {number} endTime - Epoch timestamp of timeframe end
  */
 function selectVisibleTimelines(timestampsByTimeline, startTime, endTime) {
-  const selectedTimelines = [];
+  const selectedTimelines = {};
   for (const timeline in timestampsByTimeline) {
-    const { start, end } = timestampsByTimeline[timeline];
+    const timestamps = timestampsByTimeline[timeline];
+    const { start, end } = timestamps;
     const startsAfter = !!start && start > endTime;
     const endsBefore = !!end && end < startTime;
 
@@ -131,7 +151,7 @@ function selectVisibleTimelines(timestampsByTimeline, startTime, endTime) {
       continue;
     }
 
-    selectedTimelines.push(timeline);
+    selectedTimelines[timeline] = timestamps;
   }
   return selectedTimelines;
 }
