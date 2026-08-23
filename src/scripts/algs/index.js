@@ -10,16 +10,11 @@ export function sortInPlace(arr, cmp) {
   }
 
   for (let i = 1; i < arr.length; i++) {
-    let current = arr[i];
+    const current = arr[i];
     let j = i - 1;
-
-    // Shift elements that are "greater" than current to the right
-    while (j >= 0 && cmp(arr[j], current) > 0) {
+    for (; j >= 0 && cmp(arr[j], current) > 0; --j) {
       arr[j + 1] = arr[j];
-      j--;
     }
-
-    // Insert current into its final sorted position for this round
     arr[j + 1] = current;
   }
 }
