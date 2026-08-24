@@ -1,5 +1,6 @@
 /**
  * Sort array based on cmp.
+ * Stable.
  *
  * @param {any[]} arr - Array to sort
  * @param {Function} cmp - Comparison function to use

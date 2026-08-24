@@ -1,3 +1,4 @@
+import { sortInPlace } from "../algs/index.js";
 import { getTimeZone } from "../settings/index.js";
 
 const START = "start";
@@ -39,6 +40,8 @@ let events = [
   },
 ];
 
+let enrichedEvents = null;
+
 /**
  * Returns whether the event is the start of the given timeline.
  *
@@ -65,8 +68,13 @@ export function isTimelineEnd(event, timeline) {
  * @returns {Event[]} list of events
  */
 export function getEvents() {
-  return events.map((event) => ({
+  if (!enrichedEvents) {
+    enrichedEvents = events.map((event) => ({
     ...event,
     timestamp: Temporal.ZonedDateTime.from(event.date).epochMilliseconds,
   }));
+    sortInPlace(enrichedEvents, (a, b) => a.timestamp - b.timestamp);
+  }
+  
+  return enrichedEvents;
 }
