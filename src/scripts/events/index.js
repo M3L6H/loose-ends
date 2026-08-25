@@ -14,18 +14,6 @@ const END = "end";
 
 let events = [
   {
-    name: "Test",
-    date: {
-      timeZone: getTimeZone(),
-      year: 2026,
-      month: 8,
-      day: 17,
-    },
-    timelines: {
-      "My Test": START,
-    },
-  },
-  {
     name: "Other",
     date: {
       timeZone: getTimeZone(),
@@ -36,6 +24,18 @@ let events = [
     timelines: {
       "My Test": UPDATE,
       "Other Stuff": START,
+    },
+  },
+  {
+    name: "Test",
+    date: {
+      timeZone: getTimeZone(),
+      year: 2026,
+      month: 8,
+      day: 17,
+    },
+    timelines: {
+      "My Test": START,
     },
   },
 ];
@@ -70,11 +70,12 @@ export function isTimelineEnd(event, timeline) {
 export function getEvents() {
   if (!enrichedEvents) {
     enrichedEvents = events.map((event) => ({
-    ...event,
-    timestamp: Temporal.ZonedDateTime.from(event.date).epochMilliseconds,
-  }));
+      ...event,
+      timestamp: Temporal.ZonedDateTime.from(event.date).epochMilliseconds,
+    }));
     sortInPlace(enrichedEvents, (a, b) => a.timestamp - b.timestamp);
+    console.log(enrichedEvents);
   }
-  
+
   return enrichedEvents;
 }

@@ -90,6 +90,54 @@ export function drawAtGridPoint(fn, ctx, x, y) {
 }
 
 /**
+ * Call draw fn at point on grid
+ *
+ * @param {Function} fn - The function to apply
+ * @param {CanvasRenderingContext2D } ctx - Canvas context
+ * @param {number} x - The grid column to draw in
+ * @param {number} y - The grid row to draw in
+ */
+export function drawLineThroughGridPoints(ctx, points) {
+  if (points.length < 2) return;
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(...scaleGridPointToCanvasPoint(ctx, ...points[0]));
+
+  for (let i = 1; i < points.length; ++i) {
+    const [px, py] = points[i - 1];
+    const [x, y] = points[i];
+    const xc1 = px + 0.5;
+    const yc1 = py;
+    const xc2 = x;
+    const yc2 = y;
+
+    ctx.quadraticCurveTo(
+      ...scaleGridPointToCanvasPoint(ctx, xc1, yc1),
+      ...scaleGridPointToCanvasPoint(ctx, xc2, yc2),
+      ...scaleGridPointToCanvasPoint(ctx, x, y),
+    );
+  }
+
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = "green";
+  ctx.stroke();
+  ctx.restore();
+}
+
+function scaleGridPointToCanvasPoint(ctx, x, y) {
+  const [halfNumCols, _] = getNumCols(ctx);
+
+  const halfCanvasWidth = getCanvasWidth(ctx) / 2;
+  const yOffset = getTimelineSpace();
+
+  const sx = halfCanvasWidth + (x - halfNumCols) * GRID_SPACING;
+  const sy = yOffset + y * GRID_SPACING;
+
+  return [sx, sy];
+}
+
+/**
  * Draw a grid on the canvas.
  *
  * @param {CanvasRenderingContext2D } ctx - Canvas context

@@ -1,6 +1,6 @@
 import { getEvents, isTimelineEnd, isTimelineStart } from "../events/index.js";
 import { EVENT_COLOR } from "./colors.js";
-import { drawAtGridPoint } from "./grid.js";
+import { drawAtGridPoint, drawLineThroughGridPoints } from "./grid.js";
 import { getStartAndEndTimes } from "./timeline.js";
 
 const EVENT_DOT_RADIUS = 6;
@@ -14,35 +14,98 @@ const EVENT_DOT_RADIUS = 6;
  */
 export function drawEvents(ctx, centeredOn, scaleMs) {
   const [startTime, endTime] = getStartAndEndTimes(ctx, centeredOn, scaleMs);
+  const gridXEnd = Math.floor((endTime - startTime) / scaleMs);
   const events = getEvents();
-  const timestampsByTimeline = extractTimestampsByTimeline(events);
-  const tsByVisibleTimeline = selectVisibleTimelines(
-    timestampsByTimeline,
+  const eventsByTimeline = extractEventsByTimeline(events);
+  const eventsByVisibleTimeline = selectVisibleTimelines(
+    eventsByTimeline,
     startTime,
     endTime,
   );
-  const priorityByTimeline = prioritizeTimelines(
-    Object.keys(tsByVisibleTimeline),
-  );
+  const visibleTimelines = Object.keys(eventsByVisibleTimeline);
+  const priorityByTimeline = prioritizeTimelines(visibleTimelines);
+  visibleTimelines.forEach((timeline) => {
+    const points = [];
+    const events = eventsByVisibleTimeline[timeline];
+    if (!events.start) return;
+
+    points.push(
+      getEventCoords(events.start, priorityByTimeline, scaleMs, startTime),
+    );
+    events.updates.forEach((event) => {
+      const coords = getEventCoords(
+        event,
+        priorityByTimeline,
+        scaleMs,
+        startTime,
+      );
+      const lastPoint = points[points.length - 1];
+      if (
+        lastPoint[1] !== Math.floor(lastPoint[1]) &&
+        coords[0] - lastPoint[0] > 1
+      ) {
+        points.push([lastPoint[0] + 1, priorityByTimeline[timeline]]);
+      } else if (
+        coords[1] !== Math.floor(coords[1]) &&
+        coords[0] - lastPoint[0] > 1
+      ) {
+        points.push([coords[0] - 1, priorityByTimeline[timeline]]);
+      }
+      points.push(coords);
+    });
+
+    if (!events.end) {
+      const lastPoint = points[points.length - 1];
+      if (lastPoint[1] !== Math.floor(lastPoint[1])) {
+        points.push([lastPoint[0] + 1, priorityByTimeline[timeline]]);
+      }
+      points.push([gridXEnd, priorityByTimeline[timeline]]);
+    } else {
+      const event = events.end;
+      const coords = getEventCoords(
+        event,
+        priorityByTimeline,
+        scaleMs,
+        startTime,
+      );
+      const lastPoint = points[points.length - 1];
+      if (
+        lastPoint[1] !== Math.floor(lastPoint[1]) &&
+        coords[0] - lastPoint[0] > 1
+      ) {
+        points.push([lastPoint[0] + 1, priorityByTimeline[timeline]]);
+      } else if (
+        coords[1] !== Math.floor(coords[1]) &&
+        coords[0] - lastPoint[0] > 1
+      ) {
+        points.push([coords[0] - 1, priorityByTimeline[timeline]]);
+      }
+      points.push(coords);
+    }
+
+    drawTimeline(ctx, timeline, points);
+  });
   const visibleEvents = selectVisibleEvents(events, startTime, endTime);
-  visibleEvents.forEach((event) =>
-    drawEvent(ctx, event, priorityByTimeline, scaleMs, startTime),
-  );
+  visibleEvents.forEach((event) => {
+    const [x, y] = getEventCoords(
+      event,
+      priorityByTimeline,
+      scaleMs,
+      startTime,
+    );
+    drawEvent(ctx, x, y);
+  });
 }
 
 /**
- * Draw the timeline element on the canvas.
+ * Draw an event element on the canvas.
  *
  * @param {CanvasRenderingContext2D } ctx - Canvas context
  * @param {Event} event - The event to draw
- * @param {object} priorityByTimeline - Timeline to priority map
- * @param {number} scaleMs - Scale (in ms) to render the timeline at
- * @param {number} startTime - Timestamp that the timeline starts at
+ * @param {number} x - Grid x position of the event
+ * @param {number} y - Grid y position of the event
  */
-function drawEvent(ctx, event, priorityByTimeline, scaleMs, startTime) {
-  const x = Math.ceil((event.timestamp - startTime) / scaleMs);
-  const [_, priority] = getPrimaryTimeline(event, priorityByTimeline);
-  const y = priority + (Object.keys(event.timelines).length > 1 ? 0.5 : 0);
+function drawEvent(ctx, x, y) {
   drawAtGridPoint(
     () => {
       ctx.fillStyle = EVENT_COLOR;
@@ -54,6 +117,35 @@ function drawEvent(ctx, event, priorityByTimeline, scaleMs, startTime) {
     x,
     y,
   );
+}
+
+/**
+ * Draw the timeline element on the canvas.
+ *
+ * @param {CanvasRenderingContext2D } ctx - Canvas context
+ * @param {string} timeline - Name of the timeline
+ * @param {object} points - Points to draw the timeline through
+ */
+function drawTimeline(ctx, timeline, points) {
+  if (points.length < 2) return;
+  drawLineThroughGridPoints(ctx, points);
+}
+
+/**
+ * Calculate the x and y grid position of the event based on its timelines
+ *
+ * @param {Event} event - The event to calculate y position for
+ * @param {object} priorityByTimeline - Timeline to priority map
+ * @param {number} scaleMs - Scale (in ms) to render the timeline at
+ * @param {number} startTime - Timestamp that the timeline starts at
+ */
+function getEventCoords(event, priorityByTimeline, scaleMs, startTime) {
+  const x = Math.ceil(Math.max(0, event.timestamp - startTime) / scaleMs);
+
+  const [_, priority] = getPrimaryTimeline(event, priorityByTimeline);
+  const y = priority + (Object.keys(event.timelines).length > 1 ? 0.5 : 0);
+
+  return [x, y];
 }
 
 /**
@@ -83,19 +175,19 @@ function getPrimaryTimeline(event, priorityByTimeline) {
  *
  * @param {Event[]} events - Events to search
  */
-function extractTimestampsByTimeline(events) {
-  const timestampsByTimeline = {};
+function extractEventsByTimeline(events) {
+  const eventsByTimeline = {};
   events.forEach((event) => {
     for (const timeline in event.timelines) {
-      const timestamps = timestampsByTimeline[timeline] ?? {};
-      timestampsByTimeline[timeline] = updateTimestampsForTimeline(
+      const events = eventsByTimeline[timeline] ?? {};
+      eventsByTimeline[timeline] = updateEventsForTimeline(
         event,
         timeline,
-        timestamps,
+        events,
       );
     }
   });
-  return timestampsByTimeline;
+  return eventsByTimeline;
 }
 
 /**
@@ -103,18 +195,20 @@ function extractTimestampsByTimeline(events) {
  *
  * @param {Event} event - The event in question
  * @param {string} timeline - The timeline to check
- * @param {object} timestamps - Object to update containing start/end timestamps
+ * @param {object} events - Object to update containing start/update/end timestamps
  */
-function updateTimestampsForTimeline(event, timeline, timestamps) {
-  const { timestamp } = event;
-
-  if (!timestamps.start) {
-    timestamps.start = isTimelineStart(event, timeline) ? timestamp : null;
-  } else if (!timestamps.end) {
-    timestamps.end = isTimelineEnd(event, timeline) ? timestamp : null;
+function updateEventsForTimeline(event, timeline, events) {
+  const updates = events.updates ?? [];
+  if (isTimelineStart(event, timeline)) {
+    events.start = event;
+  } else if (isTimelineEnd(event, timeline)) {
+    events.end = event;
+  } else {
+    updates.push(event);
   }
+  events.updates = updates;
 
-  return timestamps;
+  return events;
 }
 
 /**
@@ -135,23 +229,23 @@ function prioritizeTimelines(timelines) {
 /**
  * Filter the map of timelines down to the list of visible timelines.
  *
- * @param {object} timestampsByTimeline - Timelines to filter
+ * @param {object} eventsByTimeline - Timelines to filter
  * @param {number} startTime - Epoch timestamp of timeframe start
  * @param {number} endTime - Epoch timestamp of timeframe end
  */
-function selectVisibleTimelines(timestampsByTimeline, startTime, endTime) {
+function selectVisibleTimelines(eventsByTimeline, startTime, endTime) {
   const selectedTimelines = {};
-  for (const timeline in timestampsByTimeline) {
-    const timestamps = timestampsByTimeline[timeline];
-    const { start, end } = timestamps;
-    const startsAfter = !!start && start > endTime;
-    const endsBefore = !!end && end < startTime;
+  for (const timeline in eventsByTimeline) {
+    const events = eventsByTimeline[timeline];
+    const { start, end } = events;
+    const startsAfter = !!start && start.timestamp > endTime;
+    const endsBefore = !!end && end.timestamp < startTime;
 
     if (startsAfter || endsBefore) {
       continue;
     }
 
-    selectedTimelines[timeline] = timestamps;
+    selectedTimelines[timeline] = events;
   }
   return selectedTimelines;
 }
