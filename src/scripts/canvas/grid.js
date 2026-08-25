@@ -109,10 +109,10 @@ export function drawLineThroughGridPoints(ctx, points) {
     const [x, y] = points[i];
     const xc1 = px + 0.5;
     const yc1 = py;
-    const xc2 = x;
+    const xc2 = x - 0.5;
     const yc2 = y;
 
-    ctx.quadraticCurveTo(
+    ctx.bezierCurveTo(
       ...scaleGridPointToCanvasPoint(ctx, xc1, yc1),
       ...scaleGridPointToCanvasPoint(ctx, xc2, yc2),
       ...scaleGridPointToCanvasPoint(ctx, x, y),
