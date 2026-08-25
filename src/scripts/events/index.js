@@ -52,6 +52,43 @@ let events = [
       "Third Item": END,
     },
   },
+  {
+    name: "The Future",
+    date: {
+      timeZone: getTimeZone(),
+      year: 2026,
+      month: 9,
+      day: 10,
+    },
+    timelines: {
+      "Other Stuff": END,
+    },
+  },
+  {
+    name: "A",
+    date: {
+      timeZone: getTimeZone(),
+      year: 2026,
+      month: 9,
+      day: 1,
+    },
+    timelines: {
+      Alphabet: START,
+    },
+  },
+  {
+    name: "Crossover",
+    date: {
+      timeZone: getTimeZone(),
+      year: 2026,
+      month: 9,
+      day: 5,
+    },
+    timelines: {
+      Alphabet: UPDATE,
+      "Other Stuff": UPDATE,
+    },
+  },
 ];
 
 let enrichedEvents = null;

@@ -14,6 +14,7 @@ const EVENT_DOT_RADIUS = 6;
  */
 export function drawEvents(ctx, centeredOn, scaleMs) {
   const [startTime, endTime] = getStartAndEndTimes(ctx, centeredOn, scaleMs);
+  const timeData = { startTime, endTime, scaleMs };
   const events = getEvents();
   const eventsByTimeline = extractEventsByTimeline(events);
   const eventsByVisibleTimeline = selectVisibleTimelines(
@@ -22,29 +23,22 @@ export function drawEvents(ctx, centeredOn, scaleMs) {
     endTime,
   );
   const visibleTimelines = Object.keys(eventsByVisibleTimeline);
-  const priorityByTimeline = prioritizeTimelines(visibleTimelines);
+  const yByTimelineByX = getYByTimelineByX(eventsByVisibleTimeline, timeData);
   visibleTimelines.forEach((timeline) => {
     const events = eventsByVisibleTimeline[timeline];
     if (!events.start) return;
     const points = getPointsForTimeline(
       timeline,
       events,
-      priorityByTimeline,
-      scaleMs,
-      startTime,
-      endTime,
+      yByTimelineByX,
+      timeData,
     );
 
     drawTimeline(ctx, timeline, points);
   });
   const visibleEvents = selectVisibleEvents(events, startTime, endTime);
   visibleEvents.forEach((event) => {
-    const [x, y] = getEventCoords(
-      event,
-      priorityByTimeline,
-      scaleMs,
-      startTime,
-    );
+    const [x, y] = getEventCoords(event, yByTimelineByX, timeData);
     drawEvent(ctx, x, y);
   });
 }
@@ -95,78 +89,88 @@ function drawTimeline(ctx, timeline, points) {
  * Calculate the x and y grid position of the event based on its timelines
  *
  * @param {Event} event - The event to calculate y position for
- * @param {object} priorityByTimeline - Timeline to priority map
- * @param {number} scaleMs - Scale (in ms) to render the timeline at
- * @param {number} startTime - Timestamp that the timeline starts at
+ * @param {object} yByTimelineByX - Grid X to timeline to grid Y map
+ * @param {object} timeData - Object containing startTime, endTime, and scaleMs
  */
-function getEventCoords(event, priorityByTimeline, scaleMs, startTime) {
-  const x = Math.ceil(Math.max(0, event.timestamp - startTime) / scaleMs);
+function getEventCoords(event, yByTimelineByX, timeData) {
+  const x = getXFromTimestamp(event.timestamp, timeData);
 
-  const [_, priority] = getPrimaryTimeline(event, priorityByTimeline);
-  const y = priority + (Object.keys(event.timelines).length > 1 ? 0.5 : 0);
+  const [_, timelineY] = getPrimaryTimelineY(event, yByTimelineByX[x]);
+
+  // If this event merges timelines, offset its Y by 0.5
+  const y = timelineY + (Object.keys(event.timelines).length > 1 ? 0.5 : 0);
 
   return [x, y];
 }
 
-function getPointsForTimeline(
-  timeline,
-  events,
-  priorityByTimeline,
-  scaleMs,
-  startTime,
-  endTime,
-) {
+function getXFromTimestamp(timestamp, { scaleMs, startTime }) {
+  return Math.ceil(Math.max(0, timestamp - startTime) / scaleMs);
+}
+
+function mkPseudoEvent(timestamp, timeline) {
+  return {
+    timestamp,
+    timelines: {
+      [timeline]: "",
+    },
+  };
+}
+
+function getPointsForTimeline(timeline, events, yByTimelineByX, timeData) {
   const points = [];
-  points.push(
-    getEventCoords(events.start, priorityByTimeline, scaleMs, startTime),
-  );
+  const startCoords = getEventCoords(events.start, yByTimelineByX, timeData);
+  points.push(startCoords);
+
+  const [startX, _] = startCoords;
+  const updatesByX = {};
+
   events.updates.forEach((event) => {
-    const coords = getEventCoords(
-      event,
-      priorityByTimeline,
-      scaleMs,
-      startTime,
-    );
-    const lastPoint = points[points.length - 1];
-    if (
-      lastPoint[1] !== Math.floor(lastPoint[1]) &&
-      coords[0] - lastPoint[0] > 1
-    ) {
-      points.push([lastPoint[0] + 1, priorityByTimeline[timeline]]);
+    if (event.timestamp < timeData.endTime) {
+      updatesByX[getXFromTimestamp(event.timestamp, timeData)] = event;
     }
-    if (coords[1] !== Math.floor(coords[1]) && coords[0] - lastPoint[0] > 1) {
-      points.push([coords[0] - 1, priorityByTimeline[timeline]]);
-    }
-    points.push(coords);
   });
 
-  if (!events.end) {
-    const lastPoint = points[points.length - 1];
-    if (lastPoint[1] !== Math.floor(lastPoint[1])) {
-      points.push([lastPoint[0] + 1, priorityByTimeline[timeline]]);
-    }
-    const gridXEnd = Math.floor((endTime - startTime) / scaleMs);
-    points.push([gridXEnd, priorityByTimeline[timeline]]);
+  let endX = getXFromTimestamp(timeData.endTime, timeData);
+
+  if (!events.end || events.end.timestamp > timeData.endTime) {
+    updatesByX[endX] = mkPseudoEvent(timeData.endTime, timeline);
   } else {
-    const event = events.end;
-    const coords = getEventCoords(
-      event,
-      priorityByTimeline,
-      scaleMs,
-      startTime,
-    );
-    const lastPoint = points[points.length - 1];
-    if (
-      lastPoint[1] !== Math.floor(lastPoint[1]) &&
-      coords[0] - lastPoint[0] > 1
-    ) {
-      points.push([lastPoint[0] + 1, priorityByTimeline[timeline]]);
-    }
-    if (coords[1] !== Math.floor(coords[1]) && coords[0] - lastPoint[0] > 1) {
-      points.push([coords[0] - 1, priorityByTimeline[timeline]]);
-    }
-    points.push(coords);
+    endX = getXFromTimestamp(events.end.timestamp, timeData);
+    updatesByX[endX] = events.end;
   }
+
+  for (let i = startX + 1; i <= endX; ++i) {
+    const timestamp = i * timeData.scaleMs + timeData.startTime;
+    const event = updatesByX[i] ?? mkPseudoEvent(timestamp, timeline);
+    updatePointsForEvent(points, event, timeline, yByTimelineByX, timeData);
+  }
+
+  return points;
+}
+
+function updatePointsForEvent(
+  points,
+  event,
+  timeline,
+  yByTimelineByX,
+  timeData,
+) {
+  const coords = getEventCoords(event, yByTimelineByX, timeData);
+  const [x, y] = coords;
+  const [lpx, lpy] = points[points.length - 1];
+  const dx = x - lpx;
+
+  if (!Number.isInteger(lpy) && dx > 1) {
+    const xp = lpx + 1;
+    points.push([xp, yByTimelineByX[xp][timeline]]);
+  }
+  if (!Number.isInteger(y) && dx > 1) {
+    const xp = x - 1;
+    points.push([xp, yByTimelineByX[xp][timeline]]);
+  }
+
+  points.push(coords);
+
   return points;
 }
 
@@ -174,22 +178,22 @@ function getPointsForTimeline(
  * Get the primary timeline and priority for the given event.
  *
  * @param {Event} event - The event to get the primary timeline from
- * @param {object} priorityByTimeline - Map of timelines to priority
+ * @param {object} yByTimeline - Map of timelines to priority
  *
  * @returns {number[]} [primaryTimeline, primaryTimelinePriority];
  */
-function getPrimaryTimeline(event, priorityByTimeline) {
+function getPrimaryTimelineY(event, yByTimeline) {
   let currTimeline = null;
-  let currPriority = Infinity;
+  let timelineY = Infinity;
 
   Object.keys(event.timelines).forEach((timeline) => {
-    if (priorityByTimeline[timeline] < currPriority) {
+    if (yByTimeline[timeline] < timelineY) {
       currTimeline = timeline;
-      currPriority = priorityByTimeline[timeline];
+      timelineY = yByTimeline[timeline];
     }
   });
 
-  return [currTimeline, currPriority];
+  return [currTimeline, timelineY];
 }
 
 /**
@@ -234,18 +238,33 @@ function updateEventsForTimeline(event, timeline, events) {
 }
 
 /**
- * Prioritizes timelines
+ * Sorts timelines vertically based on the gridX coordinate
  *
- * @param {string[]} timelines - Timelines to prioritize
+ * @param {object} eventsByTimeline - Map of timelines to events to prioritize
+ * @param {number} startTime - Epoch timestamp of timeframe start
+ * @param {number} endTime - Epoch timestamp of timeframe end
+ * @param {number} scaleMs - Scale (in ms) that the timeline is rendered at
  */
-function prioritizeTimelines(timelines) {
-  const priorityByTimeline = {};
-  let currPriority = 0;
-  timelines.forEach((timeline) => {
-    priorityByTimeline[timeline] = currPriority;
-    ++currPriority;
-  });
-  return priorityByTimeline;
+function getYByTimelineByX(eventsByTimeline, { startTime, endTime, scaleMs }) {
+  const timelineYByTimelineByX = {};
+  for (let time = startTime; time <= endTime; time += scaleMs) {
+    const x = Math.floor((time - startTime) / scaleMs);
+    const yByTimeline = {};
+
+    let currY = 0;
+
+    for (const timeline in eventsByTimeline) {
+      const { start, end } = eventsByTimeline[timeline];
+      if (start && Math.ceil((start.timestamp - startTime) / scaleMs) > x)
+        continue;
+      if (end && Math.ceil((end.timestamp - startTime) / scaleMs) < x) continue;
+
+      yByTimeline[timeline] = currY++;
+    }
+
+    timelineYByTimelineByX[x] = yByTimeline;
+  }
+  return timelineYByTimelineByX;
 }
 
 /**
