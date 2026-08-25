@@ -24,6 +24,7 @@ let events = [
     timelines: {
       "My Test": UPDATE,
       "Other Stuff": START,
+      "Third Item": START,
     },
   },
   {
@@ -36,6 +37,19 @@ let events = [
     },
     timelines: {
       "My Test": START,
+    },
+  },
+  {
+    name: "The End",
+    date: {
+      timeZone: getTimeZone(),
+      year: 2026,
+      month: 8,
+      day: 28,
+    },
+    timelines: {
+      "My Test": END,
+      "Third Item": END,
     },
   },
 ];

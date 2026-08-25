@@ -14,7 +14,6 @@ const EVENT_DOT_RADIUS = 6;
  */
 export function drawEvents(ctx, centeredOn, scaleMs) {
   const [startTime, endTime] = getStartAndEndTimes(ctx, centeredOn, scaleMs);
-  const gridXEnd = Math.floor((endTime - startTime) / scaleMs);
   const events = getEvents();
   const eventsByTimeline = extractEventsByTimeline(events);
   const eventsByVisibleTimeline = selectVisibleTimelines(
@@ -25,63 +24,16 @@ export function drawEvents(ctx, centeredOn, scaleMs) {
   const visibleTimelines = Object.keys(eventsByVisibleTimeline);
   const priorityByTimeline = prioritizeTimelines(visibleTimelines);
   visibleTimelines.forEach((timeline) => {
-    const points = [];
     const events = eventsByVisibleTimeline[timeline];
     if (!events.start) return;
-
-    points.push(
-      getEventCoords(events.start, priorityByTimeline, scaleMs, startTime),
+    const points = getPointsForTimeline(
+      timeline,
+      events,
+      priorityByTimeline,
+      scaleMs,
+      startTime,
+      endTime,
     );
-    events.updates.forEach((event) => {
-      const coords = getEventCoords(
-        event,
-        priorityByTimeline,
-        scaleMs,
-        startTime,
-      );
-      const lastPoint = points[points.length - 1];
-      if (
-        lastPoint[1] !== Math.floor(lastPoint[1]) &&
-        coords[0] - lastPoint[0] > 1
-      ) {
-        points.push([lastPoint[0] + 1, priorityByTimeline[timeline]]);
-      } else if (
-        coords[1] !== Math.floor(coords[1]) &&
-        coords[0] - lastPoint[0] > 1
-      ) {
-        points.push([coords[0] - 1, priorityByTimeline[timeline]]);
-      }
-      points.push(coords);
-    });
-
-    if (!events.end) {
-      const lastPoint = points[points.length - 1];
-      if (lastPoint[1] !== Math.floor(lastPoint[1])) {
-        points.push([lastPoint[0] + 1, priorityByTimeline[timeline]]);
-      }
-      points.push([gridXEnd, priorityByTimeline[timeline]]);
-    } else {
-      const event = events.end;
-      const coords = getEventCoords(
-        event,
-        priorityByTimeline,
-        scaleMs,
-        startTime,
-      );
-      const lastPoint = points[points.length - 1];
-      if (
-        lastPoint[1] !== Math.floor(lastPoint[1]) &&
-        coords[0] - lastPoint[0] > 1
-      ) {
-        points.push([lastPoint[0] + 1, priorityByTimeline[timeline]]);
-      } else if (
-        coords[1] !== Math.floor(coords[1]) &&
-        coords[0] - lastPoint[0] > 1
-      ) {
-        points.push([coords[0] - 1, priorityByTimeline[timeline]]);
-      }
-      points.push(coords);
-    }
 
     drawTimeline(ctx, timeline, points);
   });
@@ -107,7 +59,7 @@ export function drawEvents(ctx, centeredOn, scaleMs) {
  */
 function drawEvent(ctx, x, y) {
   drawAtGridPoint(
-    () => {
+    (ctx) => {
       ctx.fillStyle = EVENT_COLOR;
       ctx.beginPath();
       ctx.arc(0, 0, EVENT_DOT_RADIUS, 0, 2 * Math.PI);
@@ -128,7 +80,15 @@ function drawEvent(ctx, x, y) {
  */
 function drawTimeline(ctx, timeline, points) {
   if (points.length < 2) return;
-  drawLineThroughGridPoints(ctx, points);
+  drawLineThroughGridPoints(
+    (ctx) => {
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = "green";
+      ctx.stroke();
+    },
+    ctx,
+    points,
+  );
 }
 
 /**
@@ -146,6 +106,68 @@ function getEventCoords(event, priorityByTimeline, scaleMs, startTime) {
   const y = priority + (Object.keys(event.timelines).length > 1 ? 0.5 : 0);
 
   return [x, y];
+}
+
+function getPointsForTimeline(
+  timeline,
+  events,
+  priorityByTimeline,
+  scaleMs,
+  startTime,
+  endTime,
+) {
+  const points = [];
+  points.push(
+    getEventCoords(events.start, priorityByTimeline, scaleMs, startTime),
+  );
+  events.updates.forEach((event) => {
+    const coords = getEventCoords(
+      event,
+      priorityByTimeline,
+      scaleMs,
+      startTime,
+    );
+    const lastPoint = points[points.length - 1];
+    if (
+      lastPoint[1] !== Math.floor(lastPoint[1]) &&
+      coords[0] - lastPoint[0] > 1
+    ) {
+      points.push([lastPoint[0] + 1, priorityByTimeline[timeline]]);
+    }
+    if (coords[1] !== Math.floor(coords[1]) && coords[0] - lastPoint[0] > 1) {
+      points.push([coords[0] - 1, priorityByTimeline[timeline]]);
+    }
+    points.push(coords);
+  });
+
+  if (!events.end) {
+    const lastPoint = points[points.length - 1];
+    if (lastPoint[1] !== Math.floor(lastPoint[1])) {
+      points.push([lastPoint[0] + 1, priorityByTimeline[timeline]]);
+    }
+    const gridXEnd = Math.floor((endTime - startTime) / scaleMs);
+    points.push([gridXEnd, priorityByTimeline[timeline]]);
+  } else {
+    const event = events.end;
+    const coords = getEventCoords(
+      event,
+      priorityByTimeline,
+      scaleMs,
+      startTime,
+    );
+    const lastPoint = points[points.length - 1];
+    if (
+      lastPoint[1] !== Math.floor(lastPoint[1]) &&
+      coords[0] - lastPoint[0] > 1
+    ) {
+      points.push([lastPoint[0] + 1, priorityByTimeline[timeline]]);
+    }
+    if (coords[1] !== Math.floor(coords[1]) && coords[0] - lastPoint[0] > 1) {
+      points.push([coords[0] - 1, priorityByTimeline[timeline]]);
+    }
+    points.push(coords);
+  }
+  return points;
 }
 
 /**

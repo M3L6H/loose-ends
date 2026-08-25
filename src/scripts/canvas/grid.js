@@ -85,19 +85,18 @@ export function drawAtGridPoint(fn, ctx, x, y) {
     getCanvasWidth(ctx) / 2 + (x - halfNumCols) * GRID_SPACING,
     getTimelineSpace() + y * GRID_SPACING,
   );
-  fn();
+  fn(ctx);
   ctx.restore();
 }
 
 /**
  * Call draw fn at point on grid
  *
- * @param {Function} fn - The function to apply
+ * @param {Function} fn - The function that draws the line
  * @param {CanvasRenderingContext2D } ctx - Canvas context
- * @param {number} x - The grid column to draw in
- * @param {number} y - The grid row to draw in
+ * @param {number[][]} points - List of points to draw the curve through
  */
-export function drawLineThroughGridPoints(ctx, points) {
+export function drawLineThroughGridPoints(fn, ctx, points) {
   if (points.length < 2) return;
 
   ctx.save();
@@ -119,9 +118,7 @@ export function drawLineThroughGridPoints(ctx, points) {
     );
   }
 
-  ctx.lineWidth = 3;
-  ctx.strokeStyle = "green";
-  ctx.stroke();
+  fn(ctx);
   ctx.restore();
 }
 
