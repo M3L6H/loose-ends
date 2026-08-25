@@ -1,5 +1,5 @@
 import { getEvents, isTimelineEnd, isTimelineStart } from "../events/index.js";
-import { EVENT_COLOR } from "./colors.js";
+import { EVENT_COLOR, stringToColor } from "./colors.js";
 import { drawAtGridPoint, drawLineThroughGridPoints } from "./grid.js";
 import { getStartAndEndTimes } from "./timeline.js";
 
@@ -77,7 +77,7 @@ function drawTimeline(ctx, timeline, points) {
   drawLineThroughGridPoints(
     (ctx) => {
       ctx.lineWidth = 3;
-      ctx.strokeStyle = "green";
+      ctx.strokeStyle = stringToColor(timeline);
       ctx.stroke();
     },
     ctx,

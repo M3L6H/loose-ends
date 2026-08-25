@@ -556,3 +556,26 @@ export const EVENT_COLOR = COLORS.primary.dark.color;
 export const GRID_COLOR = COLORS.outline_variant.dark.color;
 export const TIMELINE_COLOR = COLORS.secondary.dark.color;
 export const TIMELINE_TEXT_COLOR = COLORS.on_background.dark.color;
+
+/**
+ * Convert a string to a deterministic color.
+ *
+ * @param {string} str - The string to convert
+ *
+ * @returns hex color
+ */
+export function stringToColor(str) {
+  let hash = 0;
+
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+
+  let colour = "#";
+  for (let i = 0; i < 3; i++) {
+    const value = (hash >> (i * 8)) & 0xff;
+    colour += value.toString(16).padStart(2, "0");
+  }
+
+  return colour;
+}
