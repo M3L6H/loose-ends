@@ -1,6 +1,6 @@
 import { getEvents, isThreadEnd, isThreadStart } from "../events/index.js";
 import { EVENT_COLOR, stringToColor } from "./colors.js";
-import { drawAtGridPoint, drawLineThroughGridPoints, getCanvasHeight } from "./grid.js";
+import { drawAtGridPoint, drawCurvedLineThroughGridPoints } from "./grid.js";
 import { getStartAndEndTimes } from "./timeline.js";
 
 const EVENT_DOT_RADIUS = 6;
@@ -69,7 +69,7 @@ function drawEvent(ctx, x, y) {
  */
 function drawThread(ctx, thread, points) {
   if (points.length < 2) return;
-  drawLineThroughGridPoints(
+  drawCurvedLineThroughGridPoints(
     (ctx) => {
       ctx.lineWidth = 3;
       ctx.strokeStyle = stringToColor(thread);

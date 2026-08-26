@@ -1,6 +1,11 @@
 import { getTimeZone } from "../settings/index.js";
 import { CURR_DATE_COLOR, THREAD_COLOR, THREAD_TEXT_COLOR } from "./colors.js";
-import { applyAcrossGrid, getNumCols, getNumRows } from "./grid.js";
+import {
+  applyAcrossGrid,
+  drawStraightLineThroughGridPoints,
+  getNumCols,
+  getNumRows,
+} from "./grid.js";
 
 const TIMELINE_BOTTOM_MARGIN = 16;
 const TIMELINE_THICKNESS = 2;
@@ -49,7 +54,7 @@ export function getStartAndEndTimes(ctx, centeredOn, scaleMs) {
  */
 export function drawTimeline(ctx, centeredOn, scaleMs) {
   drawTimelineLine(ctx);
-  drawCurrentDateLine(ctx, centeredOn);
+  drawCurrentDateLine(ctx, centeredOn, scaleMs);
   drawTicks(ctx, centeredOn, scaleMs);
 }
 
@@ -81,16 +86,23 @@ function drawCurrentDateLine(ctx, centeredOn, scaleMs) {
   const colOffsetFromCenter = Math.floor((now - centeredOn) / scaleMs);
   const [halfCols, cols] = getNumCols(ctx);
   const x = colOffsetFromCenter + halfCols;
-  
-  if (x < 0 || x >= cols) return;
-  
-  const rows = getNumRows(); 
 
-  drawLineThroughGridPoints((ctx) => {
-    ctx.strokeStyle = CURR_DATE_COLOR;
-    ctx.lineWidth = TIMELINE_THICKNESS;
-    ctx.stroke();
-  }, ctx, [[x, -1], [x, rows]]);
+  if (x < 0 || x >= cols) return;
+
+  const rows = getNumRows(ctx);
+
+  drawStraightLineThroughGridPoints(
+    (ctx) => {
+      ctx.lineWidth = TIMELINE_THICKNESS;
+      ctx.strokeStyle = CURR_DATE_COLOR;
+      ctx.stroke();
+    },
+    ctx,
+    [
+      [x, -0.5],
+      [x, rows],
+    ],
+  );
 }
 
 /**

@@ -65,8 +65,8 @@ function drawContent() {
   ctx.fillStyle = BACKGROUND_COLOR;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  drawTimeline(ctx, centeredOn, scaleMs);
   drawGrid(ctx);
+  drawTimeline(ctx, centeredOn, scaleMs);
   drawEvents(ctx, centeredOn, scaleMs);
 }
 
