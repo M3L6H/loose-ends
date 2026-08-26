@@ -53,6 +53,9 @@ function resizeCanvas() {
 
   canvas.getContext("2d").scale(dpr, dpr);
 
+  document.getElementById("controls").innerText =
+    `DPR: ${dpr} | Canvas: ${canvas.width}x${canvas.height} | Container: ${content.clientWidth}x${content.clientHeight}`;
+
   drawContent();
 }
 

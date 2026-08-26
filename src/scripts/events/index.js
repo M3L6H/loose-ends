@@ -125,7 +125,6 @@ export function getEvents() {
       timestamp: Temporal.ZonedDateTime.from(event.date).epochMilliseconds,
     }));
     sortInPlace(enrichedEvents, (a, b) => a.timestamp - b.timestamp);
-    console.log(enrichedEvents);
   }
 
   return enrichedEvents;
