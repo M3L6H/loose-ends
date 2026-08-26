@@ -1,10 +1,163 @@
+:root {
+  --background-dark: #101418;
+  --background-default: #101418;
+  --background-light: #f7f9ff;
+  --error-dark: #ffb4ab;
+  --error-default: #ffb4ab;
+  --error-light: #ba1a1a;
+  --error-container-dark: #93000a;
+  --error-container-default: #93000a;
+  --error-container-light: #ffdad6;
+  --inverse-on-surface-dark: #2d3135;
+  --inverse-on-surface-default: #2d3135;
+  --inverse-on-surface-light: #eef1f6;
+  --inverse-primary-dark: #2d628b;
+  --inverse-primary-default: #2d628b;
+  --inverse-primary-light: #9accfa;
+  --inverse-surface-dark: #e0e2e8;
+  --inverse-surface-default: #e0e2e8;
+  --inverse-surface-light: #2d3135;
+  --on-background-dark: #e0e2e8;
+  --on-background-default: #e0e2e8;
+  --on-background-light: #181c20;
+  --on-error-dark: #690005;
+  --on-error-default: #690005;
+  --on-error-light: #ffffff;
+  --on-error-container-dark: #ffdad6;
+  --on-error-container-default: #ffdad6;
+  --on-error-container-light: #410002;
+  --on-primary-dark: #003352;
+  --on-primary-default: #003352;
+  --on-primary-light: #ffffff;
+  --on-primary-container-dark: #cde5ff;
+  --on-primary-container-default: #cde5ff;
+  --on-primary-container-light: #001d32;
+  --on-primary-fixed-dark: #001d32;
+  --on-primary-fixed-default: #001d32;
+  --on-primary-fixed-light: #001d32;
+  --on-primary-fixed-variant-dark: #094a72;
+  --on-primary-fixed-variant-default: #094a72;
+  --on-primary-fixed-variant-light: #094a72;
+  --on-secondary-dark: #233240;
+  --on-secondary-default: #233240;
+  --on-secondary-light: #ffffff;
+  --on-secondary-container-dark: #d4e4f6;
+  --on-secondary-container-default: #d4e4f6;
+  --on-secondary-container-light: #0d1d2a;
+  --on-secondary-fixed-dark: #0d1d2a;
+  --on-secondary-fixed-default: #0d1d2a;
+  --on-secondary-fixed-light: #0d1d2a;
+  --on-secondary-fixed-variant-dark: #394857;
+  --on-secondary-fixed-variant-default: #394857;
+  --on-secondary-fixed-variant-default: #394857;
+  --on-surface-dark: #e0e2e8;
+  --on-surface-default: #e0e2e8;
+  --on-surface-light: #181c20;
+  --on-surface-variant-dark: #c2c7cf;
+  --on-surface-variant-default: #c2c7cf;
+  --on-surface-variant-light: #42474e;
+  --on-tertiary-dark: #382a4a;
+  --on-tertiary-default: #382a4a;
+  --on-tertiary-light: #ffffff;
+  --on-tertiary-container-dark: #eddcff;
+  --on-tertiary-container-default: #eddcff;
+  --on-tertiary-container-light: #221533;
+  --on-tertiary-fixed-dark: #221533;
+  --on-tertiary-fixed-default: #221533;
+  --on-tertiary-fixed-light: #221533;
+  --on-tertiary-fixed-variant-dark: #4f4061;
+  --on-tertiary-fixed-variant-default: #4f4061;
+  --on-tertiary-fixed-variant-light: #4f4061;
+  --outline-dark: #8c9198;
+  --outline-default: #8c9198;
+  --outline-light: #72787e;
+  --outline-variant-dark: #42474e;
+  --outline-variant-default: #42474e;
+  --outline-variant-light: #c2c7cf;
+  --primary-dark: #9accfa;
+  --primary-default: #9accfa;
+  --primary-light: #2d628b;
+  --primary-container-dark: #094a72;
+  --primary-container-default: #094a72;
+  --primary-container-light: #cde5ff;
+  --primary-fixed-dark: #cde5ff;
+  --primary-fixed-default: #cde5ff;
+  --primary-fixed-light: #cde5ff;
+  --primary-fixed-dim-dark: #9accfa;
+  --primary-fixed-dim-default: #9accfa;
+  --primary-fixed-dim-light: #9accfa;
+  --scrim-dark: #000000;
+  --scrim-default: #000000;
+  --scrim-light: #000000;
+  --secondary-dark: #b8c8da;
+  --secondary-default: #b8c8da;
+  --secondary-light: #51606f;
+  --secondary-container-dark: #394857;
+  --secondary-container-default: #394857;
+  --secondary-container-light: #d4e4f6;
+  --secondary-fixed-dark: #d4e4f6;
+  --secondary-fixed-default: #d4e4f6;
+  --secondary-fixed-light: #d4e4f6;
+  --secondary-fixed-dim-dark: #b8c8da;
+  --secondary-fixed-dim-default: #b8c8da;
+  --secondary-fixed-dim-light: #b8c8da;
+  --shadow-dark: #000000;
+  --shadow-default: #000000;
+  --shadow-light: #000000;
+  --source-color-dark: #1d4b6d;
+  --source-color-default: #1d4b6d;
+  --source-color-light: #1d4b6d;
+  --surface-dark: #101418;
+  --surface-default: #101418;
+  --surface-light: #f7f9ff;
+  --surface-bright-dark: #36393e;
+  --surface-bright-default: #36393e;
+  --surface-bright-light: #f7f9ff;
+  --surface-container-dark: #1c2024;
+  --surface-container-default: #1c2024;
+  --surface-container-light: #ebeef3;
+  --surface-container-high-dark: #272a2e;
+  --surface-container-high-default: #272a2e;
+  --surface-container-high-light: #e6e8ee;
+  --surface-container-highest-dark: #313539;
+  --surface-container-highest-default: #313539;
+  --surface-container-highest-light: #e0e2e8;
+  --surface-container-low-dark: #181c20;
+  --surface-container-low-default: #181c20;
+  --surface-container-low-light: #f1f4f9;
+  --surface-container-lowest-dark: #0b0f12;
+  --surface-container-lowest-default: #0b0f12;
+  --surface-container-lowest-light: #ffffff;
+  --surface-dim-dark: #101418;
+  --surface-dim-default: #101418;
+  --surface-dim-light: #d7dadf;
+  --surface-tint-dark: #9accfa;
+  --surface-tint-default: #9accfa;
+  --surface-tint-light: #2d628b;
+  --surface-variant-dark: #42474e;
+  --surface-variant-default: #42474e;
+  --surface-variant-light: #dee3eb;
+  --tertiary-dark: #d2bfe7;
+  --tertiary-default: #d2bfe7;
+  --tertiary-light: #67587a;
+  --tertiary-container-dark: #4f4061;
+  --tertiary-container-default: #4f4061;
+  --tertiary-container-light: #eddcff;
+  --tertiary-fixed-dark: #eddcff;
+  --tertiary-fixed-default: #eddcff;
+  --tertiary-fixed-light: #eddcff;
+  --tertiary-fixed-dim-dark: #d2bfe7;
+  --tertiary-fixed-dim-default: #d2bfe7;
+  --tertiary-fixed-dim-light: #d2bfe7;
+}
+
 * {
   margin: 0;
   padding: 0;
 }
 
 body {
-  background-color: #2c2c30;
+  background-color: var(--surface-container-dark);
 
   display: flex;
   flex-direction: column;
@@ -13,6 +166,26 @@ body {
   width: 100vw;
 
   overflow: hidden;
+}
+
+#add-event {
+  background-color: var(--surface-container-dark);
+  cursor: pointer;
+
+  position: relative;
+
+  height: 100%;
+  border-radius: calc(100% / 2);
+  aspect-ratio: 1;
+}
+
+#add-event::after {
+  color: #9accfa;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  content: "add";
 }
 
 #canvas {
@@ -30,7 +203,7 @@ body {
 #header {
   flex: 0 0 2rem;
 
-  background-color: #0d0d10;
+  background-color: var(--background-dark);
   color: white;
 
   display: flex;
@@ -39,7 +212,7 @@ body {
 
   height: 2rem;
 
-  padding: 0 8px;
+  padding: 4px 8px;
 }
 
 #header > span {
