@@ -1,20 +1,20 @@
-const fs = require('fs');
-const crypto = require('crypto');
+import fs from "fs";
+import crypto from "crypto";
 
-const htmlFile = 'src/index.html';
-const jsFile = 'src/index.js';
+const htmlFile = "src/index.html";
 
 try {
-  const fileBuffer = fs.readFileSync(jsFile);
-  const hash = crypto.createHash('md5').update(fileBuffer).digest('hex').slice(0, 10);
+  let htmlContent = fs.readFileSync(htmlFile, "utf8");
+  
+  for (const match of htmlContent.matchAll(/([^"']+)\?v=PLACEHOLDER)/g) {
+      const file = match[1];
+      const fileBuffer = fs.readFileSync(`src/${file}`);
+      const hash = crypto.createHash("md5").update(fileBuffer).digest("hex").slice(0, 10);
+      htmlContent = htmlContent.replace(`${file}?v=PLACEHOLDER`, `?v=${hash}`);
+      console.log("Hashed file", file, hash);
+  }
 
-  const htmlContent = fs.readFileSync(htmlFile, 'utf8');
-
-  const updatedHtml = htmlContent.replace(/\?v=PLACEHOLDER/g, `?v=${hash}`);
-
-  // 4. Save the updated HTML file
-  fs.writeFileSync(htmlFile, updatedHtml, 'utf8');
-  console.log(`✅ Success! Cache busted. index.js hash is now: ${hash}`);
+  fs.writeFileSync(htmlFile, htmlContent, "utf8");
 } catch (error) {
-  console.error('❌ Error processing files:', error.message);
+  console.error("Error processing files", error.message);
 }
