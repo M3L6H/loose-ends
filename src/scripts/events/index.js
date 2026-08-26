@@ -9,7 +9,7 @@ const END = "end";
  * @typedef {Object} Event
  * @property {string} name - The name of the event
  * @property {number} timestamp - The epoch timestamp of the event
- * @property {object} timelines - The timelines affected by this event
+ * @property {object} threads - The threads affected by this event
  */
 
 let events = [
@@ -21,7 +21,7 @@ let events = [
       month: 8,
       day: 21,
     },
-    timelines: {
+    threads: {
       "My Test": UPDATE,
       "Other Stuff": START,
       "Third Item": START,
@@ -35,7 +35,7 @@ let events = [
       month: 8,
       day: 17,
     },
-    timelines: {
+    threads: {
       "My Test": START,
     },
   },
@@ -47,7 +47,7 @@ let events = [
       month: 8,
       day: 28,
     },
-    timelines: {
+    threads: {
       "My Test": END,
       "Third Item": END,
     },
@@ -60,7 +60,7 @@ let events = [
       month: 9,
       day: 10,
     },
-    timelines: {
+    threads: {
       "Other Stuff": END,
     },
   },
@@ -72,7 +72,7 @@ let events = [
       month: 9,
       day: 1,
     },
-    timelines: {
+    threads: {
       Alphabet: START,
     },
   },
@@ -84,7 +84,7 @@ let events = [
       month: 9,
       day: 5,
     },
-    timelines: {
+    threads: {
       Alphabet: UPDATE,
       "Other Stuff": UPDATE,
     },
@@ -97,20 +97,20 @@ let enrichedEvents = null;
  * Returns whether the event is the start of the given timeline.
  *
  * @param {Event} event - The event to check
- * @param {string} timeline - The timeline in question
+ * @param {string} thread - The thread in question
  */
-export function isTimelineStart(event, timeline) {
-  return (event.timelines ?? {})[timeline] === START;
+export function isThreadStart(event, thread) {
+  return (event.threads ?? {})[thread] === START;
 }
 
 /**
- * Returns whether the event is the end of the given timeline.
+ * Returns whether the event is the end of the given thread.
  *
  * @param {Event} event - The event to check
- * @param {string} timeline - The timeline in question
+ * @param {string} thread - The thread in question
  */
-export function isTimelineEnd(event, timeline) {
-  return (event.timelines ?? {})[timeline] === END;
+export function isThreadEnd(event, thread) {
+  return (event.threads ?? {})[thread] === END;
 }
 
 /**

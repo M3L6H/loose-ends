@@ -1,4 +1,4 @@
-import { getEvents, isTimelineEnd, isTimelineStart } from "../events/index.js";
+import { getEvents, isThreadEnd, isThreadStart } from "../events/index.js";
 import { EVENT_COLOR, stringToColor } from "./colors.js";
 import { drawAtGridPoint, drawLineThroughGridPoints } from "./grid.js";
 import { getStartAndEndTimes } from "./timeline.js";
@@ -6,39 +6,34 @@ import { getStartAndEndTimes } from "./timeline.js";
 const EVENT_DOT_RADIUS = 6;
 
 /**
- * Draw the timeline element on the canvas.
+ * Draw the thread element on the canvas.
  *
  * @param {CanvasRenderingContext2D } ctx - Canvas context
  * @param {number} centeredOn - Epoch timestamp to center on
- * @param {number} scaleMs - Scale (in ms) to render the timeline at
+ * @param {number} scaleMs - Scale (in ms) to render the thread at
  */
 export function drawEvents(ctx, centeredOn, scaleMs) {
   const [startTime, endTime] = getStartAndEndTimes(ctx, centeredOn, scaleMs);
   const timeData = { startTime, endTime, scaleMs };
   const events = getEvents();
-  const eventsByTimeline = extractEventsByTimeline(events);
-  const eventsByVisibleTimeline = selectVisibleTimelines(
-    eventsByTimeline,
+  const eventsByThread = extractEventsByThread(events);
+  const eventsByVisibleThread = selectVisibleThreads(
+    eventsByThread,
     startTime,
     endTime,
   );
-  const visibleTimelines = Object.keys(eventsByVisibleTimeline);
-  const yByTimelineByX = getYByTimelineByX(eventsByVisibleTimeline, timeData);
-  visibleTimelines.forEach((timeline) => {
-    const events = eventsByVisibleTimeline[timeline];
+  const visibleThreads = Object.keys(eventsByVisibleThread);
+  const yByThreadByX = getYByThreadByX(eventsByVisibleThread, timeData);
+  visibleThreads.forEach((thread) => {
+    const events = eventsByVisibleThread[thread];
     if (!events.start) return;
-    const points = getPointsForTimeline(
-      timeline,
-      events,
-      yByTimelineByX,
-      timeData,
-    );
+    const points = getPointsForThread(thread, events, yByThreadByX, timeData);
 
-    drawTimeline(ctx, timeline, points);
+    drawThread(ctx, thread, points);
   });
   const visibleEvents = selectVisibleEvents(events, startTime, endTime);
   visibleEvents.forEach((event) => {
-    const [x, y] = getEventCoords(event, yByTimelineByX, timeData);
+    const [x, y] = getEventCoords(event, yByThreadByX, timeData);
     drawEvent(ctx, x, y);
   });
 }
@@ -66,18 +61,18 @@ function drawEvent(ctx, x, y) {
 }
 
 /**
- * Draw the timeline element on the canvas.
+ * Draw the thread element on the canvas.
  *
  * @param {CanvasRenderingContext2D } ctx - Canvas context
- * @param {string} timeline - Name of the timeline
- * @param {object} points - Points to draw the timeline through
+ * @param {string} thread - Name of the thread
+ * @param {object} points - Points to draw the thread through
  */
-function drawTimeline(ctx, timeline, points) {
+function drawThread(ctx, thread, points) {
   if (points.length < 2) return;
   drawLineThroughGridPoints(
     (ctx) => {
       ctx.lineWidth = 3;
-      ctx.strokeStyle = stringToColor(timeline);
+      ctx.strokeStyle = stringToColor(thread);
       ctx.stroke();
     },
     ctx,
@@ -86,19 +81,19 @@ function drawTimeline(ctx, timeline, points) {
 }
 
 /**
- * Calculate the x and y grid position of the event based on its timelines
+ * Calculate the x and y grid position of the event based on its threads
  *
  * @param {Event} event - The event to calculate y position for
- * @param {object} yByTimelineByX - Grid X to timeline to grid Y map
+ * @param {object} yByThreadByX - Grid X to thread to grid Y map
  * @param {object} timeData - Object containing startTime, endTime, and scaleMs
  */
-function getEventCoords(event, yByTimelineByX, timeData) {
+function getEventCoords(event, yByThreadByX, timeData) {
   const x = getXFromTimestamp(event.timestamp, timeData);
 
-  const [_, timelineY] = getPrimaryTimelineY(event, yByTimelineByX[x]);
+  const [_, threadY] = getPrimaryThreadY(event, yByThreadByX[x]);
 
-  // If this event merges timelines, offset its Y by 0.5
-  const y = timelineY + (Object.keys(event.timelines).length > 1 ? 0.5 : 0);
+  // If this event merges threads, offset its Y by 0.5
+  const y = threadY + (Object.keys(event.threads).length > 1 ? 0.5 : 0);
 
   return [x, y];
 }
@@ -107,18 +102,18 @@ function getXFromTimestamp(timestamp, { scaleMs, startTime }) {
   return Math.ceil(Math.max(0, timestamp - startTime) / scaleMs);
 }
 
-function mkPseudoEvent(timestamp, timeline) {
+function mkPseudoEvent(timestamp, thread) {
   return {
     timestamp,
-    timelines: {
-      [timeline]: "",
+    threads: {
+      [thread]: "",
     },
   };
 }
 
-function getPointsForTimeline(timeline, events, yByTimelineByX, timeData) {
+function getPointsForThread(thread, events, yByThreadByX, timeData) {
   const points = [];
-  const startCoords = getEventCoords(events.start, yByTimelineByX, timeData);
+  const startCoords = getEventCoords(events.start, yByThreadByX, timeData);
   points.push(startCoords);
 
   const [startX, _] = startCoords;
@@ -133,7 +128,7 @@ function getPointsForTimeline(timeline, events, yByTimelineByX, timeData) {
   let endX = getXFromTimestamp(timeData.endTime, timeData);
 
   if (!events.end || events.end.timestamp > timeData.endTime) {
-    updatesByX[endX] = mkPseudoEvent(timeData.endTime, timeline);
+    updatesByX[endX] = mkPseudoEvent(timeData.endTime, thread);
   } else {
     endX = getXFromTimestamp(events.end.timestamp, timeData);
     updatesByX[endX] = events.end;
@@ -141,32 +136,26 @@ function getPointsForTimeline(timeline, events, yByTimelineByX, timeData) {
 
   for (let i = startX + 1; i <= endX; ++i) {
     const timestamp = i * timeData.scaleMs + timeData.startTime;
-    const event = updatesByX[i] ?? mkPseudoEvent(timestamp, timeline);
-    updatePointsForEvent(points, event, timeline, yByTimelineByX, timeData);
+    const event = updatesByX[i] ?? mkPseudoEvent(timestamp, thread);
+    updatePointsForEvent(points, event, thread, yByThreadByX, timeData);
   }
 
   return points;
 }
 
-function updatePointsForEvent(
-  points,
-  event,
-  timeline,
-  yByTimelineByX,
-  timeData,
-) {
-  const coords = getEventCoords(event, yByTimelineByX, timeData);
+function updatePointsForEvent(points, event, thread, yByThreadByX, timeData) {
+  const coords = getEventCoords(event, yByThreadByX, timeData);
   const [x, y] = coords;
   const [lpx, lpy] = points[points.length - 1];
   const dx = x - lpx;
 
   if (!Number.isInteger(lpy) && dx > 1) {
     const xp = lpx + 1;
-    points.push([xp, yByTimelineByX[xp][timeline]]);
+    points.push([xp, yByThreadByX[xp][thread]]);
   }
   if (!Number.isInteger(y) && dx > 1) {
     const xp = x - 1;
-    points.push([xp, yByTimelineByX[xp][timeline]]);
+    points.push([xp, yByThreadByX[xp][thread]]);
   }
 
   points.push(coords);
@@ -175,59 +164,55 @@ function updatePointsForEvent(
 }
 
 /**
- * Get the primary timeline and priority for the given event.
+ * Get the primary thread and priority for the given event.
  *
- * @param {Event} event - The event to get the primary timeline from
- * @param {object} yByTimeline - Map of timelines to priority
+ * @param {Event} event - The event to get the primary thread from
+ * @param {object} yByThread - Map of threads to priority
  *
- * @returns {number[]} [primaryTimeline, primaryTimelinePriority];
+ * @returns {number[]} [primaryThread, primaryThreadPriority];
  */
-function getPrimaryTimelineY(event, yByTimeline) {
-  let currTimeline = null;
-  let timelineY = Infinity;
+function getPrimaryThreadY(event, yByThread) {
+  let currThread = null;
+  let threadY = Infinity;
 
-  Object.keys(event.timelines).forEach((timeline) => {
-    if (yByTimeline[timeline] < timelineY) {
-      currTimeline = timeline;
-      timelineY = yByTimeline[timeline];
+  Object.keys(event.threads).forEach((thread) => {
+    if (yByThread[thread] < threadY) {
+      currThread = thread;
+      threadY = yByThread[thread];
     }
   });
 
-  return [currTimeline, timelineY];
+  return [currThread, threadY];
 }
 
 /**
- * Extract the timelines touched by the events with their start and end timestamps.
+ * Extract the threads touched by the events with their start and end timestamps.
  *
  * @param {Event[]} events - Events to search
  */
-function extractEventsByTimeline(events) {
-  const eventsByTimeline = {};
+function extractEventsByThread(events) {
+  const eventsByThread = {};
   events.forEach((event) => {
-    for (const timeline in event.timelines) {
-      const events = eventsByTimeline[timeline] ?? {};
-      eventsByTimeline[timeline] = updateEventsForTimeline(
-        event,
-        timeline,
-        events,
-      );
+    for (const thread in event.threads) {
+      const events = eventsByThread[thread] ?? {};
+      eventsByThread[thread] = updateEventsForThread(event, thread, events);
     }
   });
-  return eventsByTimeline;
+  return eventsByThread;
 }
 
 /**
- * Updates and returns the passed timestamps if event starts/ends the given timeline.
+ * Updates and returns the passed timestamps if event starts/ends the given thread.
  *
  * @param {Event} event - The event in question
- * @param {string} timeline - The timeline to check
+ * @param {string} thread - The thread to check
  * @param {object} events - Object to update containing start/update/end timestamps
  */
-function updateEventsForTimeline(event, timeline, events) {
+function updateEventsForThread(event, thread, events) {
   const updates = events.updates ?? [];
-  if (isTimelineStart(event, timeline)) {
+  if (isThreadStart(event, thread)) {
     events.start = event;
-  } else if (isTimelineEnd(event, timeline)) {
+  } else if (isThreadEnd(event, thread)) {
     events.end = event;
   } else {
     updates.push(event);
@@ -238,46 +223,46 @@ function updateEventsForTimeline(event, timeline, events) {
 }
 
 /**
- * Sorts timelines vertically based on the gridX coordinate
+ * Sorts threads vertically based on the gridX coordinate
  *
- * @param {object} eventsByTimeline - Map of timelines to events to prioritize
+ * @param {object} eventsByThread - Map of threads to events to prioritize
  * @param {number} startTime - Epoch timestamp of timeframe start
  * @param {number} endTime - Epoch timestamp of timeframe end
- * @param {number} scaleMs - Scale (in ms) that the timeline is rendered at
+ * @param {number} scaleMs - Scale (in ms) that the thread is rendered at
  */
-function getYByTimelineByX(eventsByTimeline, { startTime, endTime, scaleMs }) {
-  const timelineYByTimelineByX = {};
+function getYByThreadByX(eventsByThread, { startTime, endTime, scaleMs }) {
+  const threadYByThreadByX = {};
   for (let time = startTime; time <= endTime; time += scaleMs) {
     const x = Math.floor((time - startTime) / scaleMs);
-    const yByTimeline = {};
+    const yByThread = {};
 
     let currY = 0;
 
-    for (const timeline in eventsByTimeline) {
-      const { start, end } = eventsByTimeline[timeline];
+    for (const thread in eventsByThread) {
+      const { start, end } = eventsByThread[thread];
       if (start && Math.ceil((start.timestamp - startTime) / scaleMs) > x)
         continue;
       if (end && Math.ceil((end.timestamp - startTime) / scaleMs) < x) continue;
 
-      yByTimeline[timeline] = currY++;
+      yByThread[thread] = currY++;
     }
 
-    timelineYByTimelineByX[x] = yByTimeline;
+    threadYByThreadByX[x] = yByThread;
   }
-  return timelineYByTimelineByX;
+  return threadYByThreadByX;
 }
 
 /**
- * Filter the map of timelines down to the list of visible timelines.
+ * Filter the map of threads down to the list of visible threads.
  *
- * @param {object} eventsByTimeline - Timelines to filter
+ * @param {object} eventsByThread - Threads to filter
  * @param {number} startTime - Epoch timestamp of timeframe start
  * @param {number} endTime - Epoch timestamp of timeframe end
  */
-function selectVisibleTimelines(eventsByTimeline, startTime, endTime) {
-  const selectedTimelines = {};
-  for (const timeline in eventsByTimeline) {
-    const events = eventsByTimeline[timeline];
+function selectVisibleThreads(eventsByThread, startTime, endTime) {
+  const selectedThreads = {};
+  for (const thread in eventsByThread) {
+    const events = eventsByThread[thread];
     const { start, end } = events;
     const startsAfter = !!start && start.timestamp > endTime;
     const endsBefore = !!end && end.timestamp < startTime;
@@ -286,9 +271,9 @@ function selectVisibleTimelines(eventsByTimeline, startTime, endTime) {
       continue;
     }
 
-    selectedTimelines[timeline] = events;
+    selectedThreads[thread] = events;
   }
-  return selectedTimelines;
+  return selectedThreads;
 }
 
 /**

@@ -1,4 +1,4 @@
-import { TIMELINE_COLOR, TIMELINE_TEXT_COLOR } from "./colors.js";
+import { THREAD_COLOR, THREAD_TEXT_COLOR } from "./colors.js";
 import { applyAcrossGrid, getNumCols } from "./grid.js";
 
 const TIMELINE_BOTTOM_MARGIN = 16;
@@ -61,7 +61,7 @@ function drawTimelineLine(ctx) {
   const halfWidth = width / 2;
 
   ctx.save();
-  ctx.fillStyle = TIMELINE_COLOR;
+  ctx.fillStyle = THREAD_COLOR;
   ctx.translate(halfWidth, TIMELINE_V_OFFSET);
   drawCenteredRect(ctx, width, TIMELINE_THICKNESS);
   ctx.restore();
@@ -96,7 +96,7 @@ function drawTicks(ctx, centeredOn, scaleMs) {
  * @param {number} scaleMs - Scale used to format {@link tickTime}
  */
 function drawTick(ctx, tickTime, scaleMs) {
-  drawCenteredRect(ctx, TICK_WIDTH, TICK_HEIGHT, TIMELINE_COLOR);
+  drawCenteredRect(ctx, TICK_WIDTH, TICK_HEIGHT, THREAD_COLOR);
   const labelText = formatTickTime(tickTime, scaleMs);
   drawTickLabel(ctx, labelText);
 }
@@ -110,7 +110,7 @@ function drawTick(ctx, tickTime, scaleMs) {
 function drawTickLabel(ctx, labelText) {
   ctx.textAlign = "center";
   ctx.font = `${TICK_FONT_SIZE}px ${TICK_FONT}`;
-  ctx.fillStyle = TIMELINE_TEXT_COLOR;
+  ctx.fillStyle = THREAD_TEXT_COLOR;
   ctx.fillText(labelText, 0, -TICK_HEIGHT);
 }
 
