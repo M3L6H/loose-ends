@@ -6,7 +6,7 @@ const htmlFile = "src/index.html";
 try {
   let htmlContent = fs.readFileSync(htmlFile, "utf8");
   
-  for (const match of htmlContent.matchAll(/([^"']+)\?v=PLACEHOLDER)/g) {
+  for (const match of htmlContent.matchAll(/([^"']+)\?v=PLACEHOLDER/g) {
       const file = match[1];
       const fileBuffer = fs.readFileSync(`src/${file}`);
       const hash = crypto.createHash("md5").update(fileBuffer).digest("hex").slice(0, 10);
