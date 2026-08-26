@@ -10,7 +10,7 @@ try {
       const file = match[1];
       const fileBuffer = fs.readFileSync(`src/${file}`);
       const hash = crypto.createHash("md5").update(fileBuffer).digest("hex").slice(0, 10);
-      htmlContent = htmlContent.replace(`${file}?v=PLACEHOLDER`, `?v=${hash}`);
+      htmlContent = htmlContent.replace(`${file}?v=PLACEHOLDER`, `${file}?v=${hash}`);
       console.log("Hashed file", file, hash);
   }
 
