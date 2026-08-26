@@ -552,6 +552,7 @@ const COLORS = {
 };
 
 export const BACKGROUND_COLOR = COLORS.background.dark.color;
+export consf CURR_DATE_COLOR = COLORS.secondary.dark.color;
 export const EVENT_COLOR = COLORS.primary.dark.color;
 export const GRID_COLOR = COLORS.outline_variant.dark.color;
 export const THREAD_COLOR = COLORS.secondary.dark.color;

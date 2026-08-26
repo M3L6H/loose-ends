@@ -1,6 +1,6 @@
 import { getEvents, isThreadEnd, isThreadStart } from "../events/index.js";
 import { EVENT_COLOR, stringToColor } from "./colors.js";
-import { drawAtGridPoint, drawLineThroughGridPoints } from "./grid.js";
+import { drawAtGridPoint, drawLineThroughGridPoints, getCanvasHeight } from "./grid.js";
 import { getStartAndEndTimes } from "./timeline.js";
 
 const EVENT_DOT_RADIUS = 6;

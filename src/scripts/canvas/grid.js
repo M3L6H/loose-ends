@@ -45,6 +45,17 @@ export function getNumCols(ctx) {
 }
 
 /**
+ * Get the number of rows that fit in the canvas
+ *
+ * @param {CanvasRenderingContext2D} ctx - Canvas context
+ */
+export function getNumRows(ctx) {
+  const topOffset = getTimelineSpace();
+  const height = getCanvasHeight(ctx) - topOffset;
+  return Math.floor(height / GRID_SPACING) + 1;
+}
+
+/**
  * Apply fn across the grid
  *
  * @param {Function} fn - The function to apply
@@ -140,9 +151,7 @@ function scaleGridPointToCanvasPoint(ctx, x, y) {
  * @param {CanvasRenderingContext2D } ctx - Canvas context
  */
 export function drawGrid(ctx) {
-  const topOffset = getTimelineSpace();
-  const height = getCanvasHeight(ctx) - topOffset;
-  const rows = Math.floor(height / GRID_SPACING) + 1;
+  const rows = getNumRows(ctx);
 
   applyAcrossGrid(
     () => {

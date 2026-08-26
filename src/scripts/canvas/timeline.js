@@ -1,5 +1,6 @@
-import { THREAD_COLOR, THREAD_TEXT_COLOR } from "./colors.js";
-import { applyAcrossGrid, getNumCols } from "./grid.js";
+import { getTimeZone } from "../settings/index.js";
+import { CURR_DATE_COLOR, THREAD_COLOR, THREAD_TEXT_COLOR } from "./colors.js";
+import { applyAcrossGrid, getNumCols, getNumRows } from "./grid.js";
 
 const TIMELINE_BOTTOM_MARGIN = 16;
 const TIMELINE_THICKNESS = 2;
@@ -48,6 +49,7 @@ export function getStartAndEndTimes(ctx, centeredOn, scaleMs) {
  */
 export function drawTimeline(ctx, centeredOn, scaleMs) {
   drawTimelineLine(ctx);
+  drawCurrentDateLine(ctx, centeredOn);
   drawTicks(ctx, centeredOn, scaleMs);
 }
 
@@ -65,6 +67,30 @@ function drawTimelineLine(ctx) {
   ctx.translate(halfWidth, TIMELINE_V_OFFSET);
   drawCenteredRect(ctx, width, TIMELINE_THICKNESS);
   ctx.restore();
+}
+
+/**
+ * Draw a line representing the current date
+ *
+ * @param {CanvasRenderingContext2D } ctx - Canvas context
+ * @param {number} centeredOn - Epoch timestamp to center on
+ * @param {number} scaleMs - Scale (in ms) to render the tick labels at
+ */
+function drawCurrentDateLine(ctx, centeredOn, scaleMs) {
+  const now = Temporal.Now.zonedDateTimeISO(getTimeZone()).epochMilliseconds;
+  const colOffsetFromCenter = Math.floor((now - centeredOn) / scaleMs);
+  const [halfCols, cols] = getNumCols(ctx);
+  const x = colOffsetFromCenter + halfCols;
+  
+  if (x < 0 || x >= cols) return;
+  
+  const rows = getNumRows(); 
+
+  drawLineThroughGridPoints((ctx) => {
+    ctx.strokeStyle = CURR_DATE_COLOR;
+    ctx.lineWidth = TIMELINE_THICKNESS;
+    ctx.stroke();
+  }, ctx, [[x, -1], [x, rows]]);
 }
 
 /**

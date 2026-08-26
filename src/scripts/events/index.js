@@ -89,6 +89,18 @@ let events = [
       "Other Stuff": UPDATE,
     },
   },
+  {
+    name: "A New Thread Starts",
+    date: {
+      timeZone: getTimeZone(),
+      year: 2026,
+      month: 8,
+      day: 22,
+    },
+    threads: {
+      Creation: START,
+    },
+  },
 ];
 
 let enrichedEvents = null;
