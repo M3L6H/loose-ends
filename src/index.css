@@ -175,9 +175,9 @@ body {
 
   position: relative;
 
-  height: 100%;
-  border-radius: calc(100% / 2);
-  aspect-ratio: 1;
+  height: 2rem;
+  width: 2rem;
+  border-radius: 50%;
 }
 
 #add-event::after {
