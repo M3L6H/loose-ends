@@ -172,6 +172,8 @@ html, body {
 .card {
   background-color: var(--surface-container-dark);
   border-radius: 8px;
+
+  padding: 12px 8px;
 }
 
 .card .body {
@@ -183,6 +185,10 @@ html, body {
 .card .header {
   color: var(--on-surface-dark);
   flex: 0 0 auto;
+  flex-direction: row;
+
+  align-items: stretch;
+  justify-content: space-between;
 }
 
 .modal {
