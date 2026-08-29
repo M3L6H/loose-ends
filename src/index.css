@@ -159,16 +159,44 @@
   overflow: hidden;
 }
 
-body {
+html, body {
   background-color: var(--surface-container-dark);
-
-  display: flex;
-  flex-direction: column;
 
   height: 100vh;
   width: 100vw;
 
   overflow: hidden;
+  overscroll-behavior: none;
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  
+  background-color: var(--scrim-dark);
+  opacity: 0.8;
+}
+
+.modal .card {
+  margin: auto;
+  
+  display: flex;
+  
+  height: 900px;
+  max-height: 80vh;
+  
+  width: 600px;
+  max-width: 80vw;
+}
+
+.card .header {
+  flex: 0 0 auto;
+}
+
+.card .body {
+  flex: 1 0 auto;
+  
+  overflow-y: scroll;
 }
 
 #add-event {
@@ -221,4 +249,12 @@ body {
 #header > span {
   display: flex;
   align-items: center;
+}
+
+#viewport {
+  position: absolute;
+  inset: 0;
+  
+  display: flex;
+  flex-direction: column;
 }
