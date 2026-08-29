@@ -180,6 +180,14 @@ html, body {
   border-radius: 50%;
 }
 
+.button::after {
+  color: var(--primary-dark);
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
 .card {
   background-color: var(--surface-container-dark);
   border-radius: 8px;
@@ -202,6 +210,10 @@ html, body {
 
   align-items: stretch;
   justify-content: space-between;
+}
+
+.close::after {
+  content: "close";
 }
 
 .modal {
@@ -229,11 +241,6 @@ html, body {
 }
 
 #add-event::after {
-  color: #9accfa;
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
   content: "add";
 }
 
