@@ -169,6 +169,17 @@ html, body {
   overscroll-behavior: none;
 }
 
+.button {
+  background-color: var(--surface-container-dark);
+  cursor: pointer;
+  
+  position: relative;
+  
+  height: 1.6rem;
+  width: 1.6rem;
+  border-radius: 50%;
+}
+
 .card {
   background-color: var(--surface-container-dark);
   border-radius: 8px;
@@ -215,17 +226,6 @@ html, body {
   
   width: 600px;
   max-width: 80vw;
-}
-
-#add-event {
-  background-color: var(--surface-container-dark);
-  cursor: pointer;
-
-  position: relative;
-
-  height: 1.6rem;
-  width: 1.6rem;
-  border-radius: 50%;
 }
 
 #add-event::after {
