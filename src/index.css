@@ -169,18 +169,27 @@ html, body {
   overscroll-behavior: none;
 }
 
+.card {
+  background-color: var(--surface-container-dark);
+  border-radius: 8px;
+}
+
 .modal {
   position: fixed;
   inset: 0;
   
   background-color: var(--scrim-dark);
   opacity: 0.8;
+
+  display: grid;
+  place-items: center;
 }
 
 .modal .card {
   margin: auto;
   
   display: flex;
+  flex-direction: vertical;
   
   height: 900px;
   max-height: 80vh;
