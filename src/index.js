@@ -1,7 +1,7 @@
-import { canvas } from "./scripts/index.js";
+import scripts from "./scripts/index.js";
 
 function init() {
-  canvas.init();
+  scripts.init();
 }
 
 addEventListener("load", () => init());
