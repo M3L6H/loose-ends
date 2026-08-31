@@ -1,5 +1,5 @@
-import canvas from "./canvas/index.js";
-import components from "./components/index.js";
+import * as canvas from "./canvas/index.js";
+import * as components from "./components/index.js";
 
 export function init() {
   canvas.init();
