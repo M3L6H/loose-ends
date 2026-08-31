@@ -244,7 +244,7 @@ body {
   max-width: 80vw;
 }
 
-#add-event::after {
+#add-event-btn::after {
   content: "add";
 }
 
