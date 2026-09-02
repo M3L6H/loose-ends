@@ -168,6 +168,16 @@ body {
 
   overflow: hidden;
   overscroll-behavior: none;
+
+  font-size: 100%; 
+}
+
+form input {
+  font-size: 1rem;
+}
+
+form textarea {
+  font-size: 1rem;
 }
 
 .button {
