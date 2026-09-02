@@ -217,6 +217,17 @@ body {
   content: "close";
 }
 
+.form-input {
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.form-input > * {
+  width: 100%;
+}
+
 .hidden {
   display: none !important;
 }
