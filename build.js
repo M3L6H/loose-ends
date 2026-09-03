@@ -23,7 +23,7 @@ function getFiles(dir) {
 getFiles(SRC_DIR).forEach(file => {
   try {
     let content = fs.readFileSync(file, "utf8");
-    const matches = content.matchAll(/([^"']+\.js)(?:\?v=PLACEHOLDER)?/g);
+    const matches = content.matchAll(/([^"']+\.(?:css|js))(?:\?v=PLACEHOLDER)?/g);
     let hasMatches = false;
 
     for (const match of matches) {
