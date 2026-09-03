@@ -172,12 +172,21 @@ body {
   font-size: 100%; 
 }
 
-form input {
+form input,
+form textarea {
   font-size: 1rem;
+  padding: 2px 4px;
 }
 
 form textarea {
-  font-size: 1rem;
+  resize: none;
+
+  field-sizing: content;
+
+  min-height: 2rem;
+  max-height: 10rem;
+
+  overflow: auto;
 }
 
 .button {

@@ -1,20 +1,40 @@
-import fs from "fs";
 import crypto from "crypto";
+import fs from "fs";
+import path from "path";
 
-const htmlFile = "src/index.html";
+const SRC_DIR = './src';
 
-try {
-  let htmlContent = fs.readFileSync(htmlFile, "utf8");
+function getFiles(dir) {
+  let results = [];
+  const list = fs.readdirSync(dir);
   
-  for (const match of htmlContent.matchAll(/([^"']+)\?v=PLACEHOLDER/g)) {
-      const file = match[1];
-      const fileBuffer = fs.readFileSync(`src/${file}`);
-      const hash = crypto.createHash("md5").update(fileBuffer).digest("hex").slice(0, 10);
-      htmlContent = htmlContent.replace(`${file}?v=PLACEHOLDER`, `${file}?v=${hash}`);
-      console.log("Hashed file", file, hash);
-  }
-
-  fs.writeFileSync(htmlFile, htmlContent, "utf8");
-} catch (error) {
-  console.error("Error processing files", error.message);
+  list.forEach((file) => {
+    const filePath = path.join(dir, file);
+    const stat = fs.statSync(filePath);
+    if (stat && stat.isDirectory()) {
+      results = results.concat(getFiles(filePath));
+    } else {
+      results.push(filePath);
+    }
+  });
+  return results;
 }
+
+getFiles(SRC_DIR).forEach(file => {
+  try {
+    let content = fs.readFileSync(file, "utf8");
+  
+    for (const match of content.matchAll(/([^"']+\.js)(?:\?v=PLACEHOLDER)?/g)) {
+      const fileStr = match[1];
+      const fileBuffer = fs.readFileSync(path.join(path.dirname(file), fileStr));
+      const hash = crypto.createHash("md5").update(fileBuffer).digest("hex").slice(0, 10);
+      content = content.replace(match[0], `${fileStr}?v=${hash}`);
+      console.log("Hashed file", fileStr, hash);
+    }
+
+    fs.writeFileSync(file, content, "utf8");
+    console.log("Busted imports in file", file);
+  } catch (error) {
+    console.error("Error processing file", file, error.message);
+  }
+} 
