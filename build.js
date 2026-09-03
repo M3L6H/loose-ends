@@ -37,4 +37,4 @@ getFiles(SRC_DIR).forEach(file => {
   } catch (error) {
     console.error("Error processing file", file, error.message);
   }
-} 
+});
