@@ -24,16 +24,23 @@ getFiles(SRC_DIR).forEach(file => {
   try {
     let content = fs.readFileSync(file, "utf8");
     const matches = content.matchAll(/([^"']+\.js)(?:\?v=PLACEHOLDER)?/g);
+    let hasMatches = false;
 
     for (const match of matches) {
       const fileStr = match[1];
-      const fileBuffer = fs.readFileSync(path.join(path.dirname(file), fileStr));
-      const hash = crypto.createHash("md5").update(fileBuffer).digest("hex").slice(0, 10);
-      content = content.replace(match[0], `${fileStr}?v=${hash}`);
-      console.log("Hashed file", fileStr, hash);
+      try {
+        const filePath = path.join(path.dirname(file), fileStr);
+        const fileBuffer = fs.readFileSync(filePath);
+        const hash = crypto.createHash("md5").update(fileBuffer).digest("hex").slice(0, 10);
+        content = content.replace(match[0], `${fileStr}?v=${hash}`);
+        console.log("Hashed file", fileStr, hash);
+        hasMatches = true;
+      } catch (error) {
+        console.warn("Failed to hash file", filePath, error);
+      }
     }
 
-    if (matches.length > 0) {
+    if (hasMatches) {
       fs.writeFileSync(file, content, "utf8");
       console.log("Busted imports in file", file);
     }
