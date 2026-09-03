@@ -1,3 +1,12 @@
+import { getTimeZone } from "../settings/index.js";
+
 export function init() {
-    const modal = document.getElementById("add-event-modal");
+  const modal = document.getElementById("add-event-modal");
+
+  modal.addEventListener("open", () => {
+    const dateInput = modal.querySelector("#event-date");
+    const now = const now = Temporal.Now.zonedDateTimeISO(getTimeZone()).toString();
+    dateInput.placeholder = now;
+    dateInput.value = now;
+  });
 }

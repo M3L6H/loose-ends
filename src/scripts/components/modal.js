@@ -1,3 +1,12 @@
+export function showModal(id) {
+  const modal = document.getElementById(id);
+
+  if (!modal) return;
+  
+  modal.classList.remove("hidden");
+  modal.dispatchEvent(new Event(open));
+}
+
 export function init() {
   const modals = document.querySelectorAll(".modal");
   modals.forEach((modal) => {
@@ -8,7 +17,7 @@ export function init() {
       modal.classList.add("hidden");
 
       if (!!form) {
-        form.clear();
+        form.reset();
       }
     });
   });
