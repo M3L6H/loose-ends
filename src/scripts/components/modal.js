@@ -4,7 +4,7 @@ export function showModal(id) {
   if (!modal) return;
   
   modal.classList.remove("hidden");
-  modal.dispatchEvent(new Event(open));
+  modal.dispatchEvent(new Event("open"));
 }
 
 export function init() {
