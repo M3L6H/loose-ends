@@ -23,8 +23,9 @@ function getFiles(dir) {
 getFiles(SRC_DIR).forEach(file => {
   try {
     let content = fs.readFileSync(file, "utf8");
-  
-    for (const match of content.matchAll(/([^"']+\.js)(?:\?v=PLACEHOLDER)?/g)) {
+    const matches = content.matchAll(/([^"']+\.js)(?:\?v=PLACEHOLDER)?/g);
+
+    for (const match of matches) {
       const fileStr = match[1];
       const fileBuffer = fs.readFileSync(path.join(path.dirname(file), fileStr));
       const hash = crypto.createHash("md5").update(fileBuffer).digest("hex").slice(0, 10);
@@ -32,8 +33,10 @@ getFiles(SRC_DIR).forEach(file => {
       console.log("Hashed file", fileStr, hash);
     }
 
-    fs.writeFileSync(file, content, "utf8");
-    console.log("Busted imports in file", file);
+    if (matches.length > 0) {
+      fs.writeFileSync(file, content, "utf8");
+      console.log("Busted imports in file", file);
+    }
   } catch (error) {
     console.error("Error processing file", file, error.message);
   }
