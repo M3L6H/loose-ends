@@ -5,7 +5,10 @@ export function init() {
 
   modal.addEventListener("open", () => {
     const dateInput = modal.querySelector("#event-date");
-    const now = Temporal.Now.zonedDateTimeISO(getTimeZone()).toString();
+    const now = Temporal.Now.zonedDateTimeISO(getTimeZone()).toString({ 
+      timeZoneName: 'never', 
+      fractionalSecondDigits: 0 
+    });
     dateInput.placeholder = now;
     dateInput.value = now;
   });
