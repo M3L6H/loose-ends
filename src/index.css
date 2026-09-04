@@ -172,12 +172,23 @@ body {
   font-size: 100%; 
 }
 
+button {
+  border-radius: 4px;
+
+  padding: 6px 10px;
+}
+
+button[type="submit"] {
+  background-color: var(--primary-dark);
+  color: var(--on-primary-dark);
+}
+
 form {
   display: flex;
   flex-direction: column;
   
   align-items: stretch;
-  gap: 8px;
+  gap: 12px;
 }
 
 form input,
@@ -238,6 +249,8 @@ form textarea {
 
   align-items: stretch;
   justify-content: space-between;
+  
+  margin-bottom: 16px;
 }
 
 .close::after {
