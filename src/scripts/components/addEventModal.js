@@ -6,7 +6,7 @@ const yr = (i) => (c, v) => {
     return true;
   }
   v.splice(0, 0, getYear()[0]);
-  for (let j = i; i < 3; ++j) {
+  for (let j = i; j < 3; ++j) {
     v.splice(1, 0, "0");
   }
   return false;
