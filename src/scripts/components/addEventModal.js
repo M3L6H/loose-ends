@@ -17,7 +17,7 @@ const insZero = (c, v) => {
     return true;
   }
 
-  v.insert("0");
+  v.insert(v.length - 1, "0");
   return false;
 };
 const upTo = (n, altFn) => (c, v) => {
@@ -27,7 +27,7 @@ const upTo = (n, altFn) => (c, v) => {
       return true;
     }
 
-    v.insert(0, "0");
+    v.insert(v.length - 1, "0");
     v.push(c);
     return true;
   }
