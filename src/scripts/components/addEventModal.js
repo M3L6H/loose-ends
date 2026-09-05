@@ -11,14 +11,32 @@ const yr = (i) => (c, v) => {
   }
   return false;
 };
-const insZero = (c, v) => {
-  if (/[0-9]/.test(c)) {
+const insZero = (max) => (c, v) => {
+  if (/[0-9]/.test(c) && parseInt(v[v.length - 1] + c) <= max) {
     v.push(c);
     return true;
   }
 
   v.splice(v.length - 1, 0, "0");
   return false;
+};
+const isLeap = (v) => {
+  const year = parseInt(v[0] + v[1] + v[2] + v[3]);
+  const isCentury = year % 100 === 0;
+  
+  return (isCentury && year % 400 === 0) || (!isCentury && year % 4 === 0);
+};
+const insZeroDay = (c, v) => {
+  const mo = parseInt(v[5] + v[6]);
+  const smallMo = mo < 8;
+  const oddMo = mo % 2 === 1;
+  if (mo === 2) {
+    return insZero(isLeap(v) ? 29 : 28)(c, v);
+  }
+  if ((smallMo && oddMo) || (!smallMo && !oddMo)) {
+    return insZero(31)(c, v);
+  }
+  return insZero(30)(c, v);
 };
 const upTo = (n, altFn) => (c, v) => {
   if (/[0-9]/.test(c)) {
@@ -53,19 +71,19 @@ const DATE_PARSERS = [
   yr(3),
   sep("-"),
   upTo(1, getMonth),
-  insZero,
+  insZero(12),
   sep("-"), 
   upTo(3, getDay),
-  insZero,
+  insZeroDay,
   sep("T"),
   upTo(2, getHour),
-  insZero,
+  insZero(23),
   sep(":"),
   upTo(5, getMinute),
-  insZero,
+  insZero(59),
   sep(":"),
   upTo(5, getSecond),
-  insZero
+  insZero(59)
 ];
 const MO_START_IDX = 5;
 
