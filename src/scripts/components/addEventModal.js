@@ -23,7 +23,7 @@ const insZero = (max) => (c, v) => {
 const isLeap = (v) => {
   const year = parseInt(v[0] + v[1] + v[2] + v[3]);
   const isCentury = year % 100 === 0;
-  
+
   return (isCentury && year % 400 === 0) || (!isCentury && year % 4 === 0);
 };
 const insZeroDay = (c, v) => {
@@ -50,7 +50,9 @@ const upTo = (n, altFn) => (c, v) => {
     return true;
   }
 
-  altFn().split("").forEach(ch => v.push(ch));
+  altFn()
+    .split("")
+    .forEach((ch) => v.push(ch));
   return false;
 };
 const sep = (s) => (c, v) => {
@@ -63,7 +65,9 @@ const DATE_PARSERS = [
       v.push(c);
       return true;
     }
-    getYear().split("").forEach(ch => v.push(ch));
+    getYear()
+      .split("")
+      .forEach((ch) => v.push(ch));
     return false;
   },
   yr(1),
@@ -72,7 +76,7 @@ const DATE_PARSERS = [
   sep("-"),
   upTo(1, getMonth),
   insZero(12),
-  sep("-"), 
+  sep("-"),
   upTo(3, getDay),
   insZeroDay,
   sep("T"),
@@ -83,48 +87,38 @@ const DATE_PARSERS = [
   insZero(59),
   sep(":"),
   upTo(5, getSecond),
-  insZero(59)
+  insZero(59),
 ];
-const MO_START_IDX = 5;
 
 function getNow() {
   return Temporal.Now.zonedDateTimeISO(getTimeZone());
 }
 
 function getSecond(d) {
-  return (d ?? getNow()).toLocaleString("en-US", { second: "2-digit" })
+  return (d ?? getNow()).toLocaleString("en-US", { second: "2-digit" });
 }
 
 function getMinute(d) {
-  return (d ?? getNow()).toLocaleString("en-US", { minute: "2-digit" })
+  return (d ?? getNow()).toLocaleString("en-US", { minute: "2-digit" });
 }
 
 function getHour(d) {
-  return (d ?? getNow()).toLocaleString("en-US", { hourCycle: "h24", hour: "2-digit" })
+  return (d ?? getNow()).toLocaleString("en-US", {
+    hourCycle: "h24",
+    hour: "2-digit",
+  });
 }
 
 function getDay(d) {
-  return (d ?? getNow()).toLocaleString("en-US", { day: "2-digit" })
+  return (d ?? getNow()).toLocaleString("en-US", { day: "2-digit" });
 }
 
 function getMonth(d) {
-  return (d ?? getNow()).toLocaleString("en-US", { month: "2-digit" })
+  return (d ?? getNow()).toLocaleString("en-US", { month: "2-digit" });
 }
 
 function getYear(d) {
-  return (d ?? getNow()).toLocaleString("en-US", { year: "numeric" })
-}
-
-function backFillY(val, c) {
-  let fill = val ?? "";
-  const year = `${getNow().year}`;
-  if (fill.length === 0) {
-    return year;
-  }
-  if (fill.length === 1) {
-    fill = "0" + fill;
-  }
-  return year.substring(0, year.length - fill.length) + fill;
+  return (d ?? getNow()).toLocaleString("en-US", { year: "numeric" });
 }
 
 export function init() {
@@ -132,22 +126,14 @@ export function init() {
 
   modal.addEventListener("open", () => {
     const dateInput = modal.querySelector("#event-date");
-    const now = getNow().toString({ 
-      timeZoneName: 'never', 
-      fractionalSecondDigits: 0 
+    const now = getNow().toPlainDateTime().toString({
+      fractionalSecondDigits: 0,
     });
     dateInput.placeholder = now;
     dateInput.value = now;
   });
 
   const dateInput = modal.querySelector("#event-date");
-  dateInput.addEventListener("focus", () => {
-    const pos = Math.max(0, dateInput.value.lastIndexOf("-"));
-    setTimeout(() => {
-      dateInput.setSelectionRange(pos, pos);
-    }, 1);
-    dateInput.dataset.prev = dateInput.value;
-  });
 
   dateInput.addEventListener("beforeinput", (e) => {
     if (e.inputType !== "insertText") {
@@ -167,15 +153,15 @@ export function init() {
       if (!parser) break;
       if (!parser(c, val)) --i;
     }
-    
+
     for (let i = pos; i < prev.length; ++i) {
       const parser = DATE_PARSERS[val.length];
       if (!parser) break;
       if (!parser(prev[i], val)) --i;
     }
-    
+
     val = val.join("");
-    
+
     dateInput.value = val;
   });
 }
