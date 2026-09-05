@@ -11,13 +11,19 @@ const yr = (i) => (c, v) => {
   }
   return false;
 };
-const insZero = (max) => (c, v) => {
-  if (/[0-9]/.test(c) && parseInt(v[v.length - 1] + c) <= max) {
-    v.push(c);
-    return true;
+const insZero = (max, min = 0) => (c, v) => {
+  if (/[0-9]/.test(c)) {
+    const n = parseInt(v[v.length - 1] + c);
+    
+    if (n >= min && n <= max) {
+      v.push(c);
+      return true;
+    } 
   }
 
+  const lastI = v.length;
   v.splice(v.length - 1, 0, "0");
+  v[lastI] = `${Math.max(parseInt(v[lastI]), min)}`;
   return false;
 };
 const isLeap = (v) => {
@@ -31,12 +37,12 @@ const insZeroDay = (c, v) => {
   const smallMo = mo < 8;
   const oddMo = mo % 2 === 1;
   if (mo === 2) {
-    return insZero(isLeap(v) ? 29 : 28)(c, v);
+    return insZero(isLeap(v) ? 29 : 28, 1)(c, v);
   }
   if ((smallMo && oddMo) || (!smallMo && !oddMo)) {
-    return insZero(31)(c, v);
+    return insZero(31, 1)(c, v);
   }
-  return insZero(30)(c, v);
+  return insZero(30, 1)(c, v);
 };
 const upTo = (n, altFn) => (c, v) => {
   if (/[0-9]/.test(c)) {
@@ -55,9 +61,9 @@ const upTo = (n, altFn) => (c, v) => {
     .forEach((ch) => v.push(ch));
   return false;
 };
-const sep = (s) => (c, v) => {
+const sep = (s, ...alt) => (c, v) => {
   v.push(s);
-  return s === c;
+  return s === c || alt.contains(c);
 };
 const DATE_PARSERS = [
   (c, v) => {
@@ -75,18 +81,18 @@ const DATE_PARSERS = [
   yr(3),
   sep("-"),
   upTo(1, getMonth),
-  insZero(12),
-  sep("-"),
+  insZero(12, 1),
+  sep("-", "–", "—"),
   upTo(3, getDay),
   insZeroDay,
   sep("T"),
   upTo(2, getHour),
   insZero(23),
   sep(":"),
-  upTo(5, getMinute),
+  upTo(5, getZeros),
   insZero(59),
   sep(":"),
-  upTo(5, getSecond),
+  upTo(5, getZeros),
   insZero(59),
 ];
 
@@ -94,12 +100,8 @@ function getNow() {
   return Temporal.Now.zonedDateTimeISO(getTimeZone());
 }
 
-function getSecond(d) {
-  return (d ?? getNow()).toLocaleString("en-US", { second: "2-digit" });
-}
-
-function getMinute(d) {
-  return (d ?? getNow()).toLocaleString("en-US", { minute: "2-digit" });
+function getZeros() {
+  return "00";
 }
 
 function getHour(d) {
