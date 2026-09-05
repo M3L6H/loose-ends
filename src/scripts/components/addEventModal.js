@@ -61,6 +61,10 @@ const upTo = (n, altFn) => (c, v) => {
     .forEach((ch) => v.push(ch));
   return false;
 };
+const upToDay = (c, v) => {
+  const mo = parseInt(v[5] + v[6]);
+  return upTo(mo === 2 ? 2 : 3, getDay)(c, v);
+};
 const sep = (s, ...alt) => (c, v) => {
   v.push(s);
   return s === c || alt.includes(c);
@@ -83,7 +87,7 @@ const DATE_PARSERS = [
   upTo(1, getMonth),
   insZero(12, 1),
   sep("-", "–", "—"),
-  upTo(3, getDay),
+  upToDay,
   insZeroDay,
   sep("T"),
   upTo(2, getHour),
