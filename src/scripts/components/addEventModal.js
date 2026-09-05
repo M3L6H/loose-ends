@@ -63,7 +63,7 @@ const upTo = (n, altFn) => (c, v) => {
 };
 const sep = (s, ...alt) => (c, v) => {
   v.push(s);
-  return s === c || alt.contains(c);
+  return s === c || alt.includes(c);
 };
 const DATE_PARSERS = [
   (c, v) => {
