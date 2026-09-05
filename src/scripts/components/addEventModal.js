@@ -27,7 +27,7 @@ const upTo = (n, altFn) => (c, v) => {
       return true;
     }
 
-    v.splice(v.length - 1, 0, "0");
+    v.push("0");
     v.push(c);
     return true;
   }
