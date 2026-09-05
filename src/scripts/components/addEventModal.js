@@ -82,7 +82,7 @@ function getMinute(d) {
 }
 
 function getHour(d) {
-  return (d ?? getNow()).toLocaleString("en-US", { hour: "2-digit" })
+  return (d ?? getNow()).toLocaleString("en-US", { hourCycle: "h24", hour: "2-digit" })
 }
 
 function getDay(d) {

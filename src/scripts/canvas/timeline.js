@@ -160,6 +160,7 @@ const MINUTE_AND_SECOND_FORMAT = new Intl.DateTimeFormat("en-US", {
 });
 
 const HOUR_AND_MINUTE_FORMAT = new Intl.DateTimeFormat("en-US", {
+  hourCycle: "h24",
   hour: "2-digit",
   minute: "2-digit",
 });
