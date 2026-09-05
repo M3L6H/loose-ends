@@ -1,21 +1,5 @@
 import { getTimeZone } from "../settings/index.js";
 
-// [T] -> 2026-09-04T
-// 2 [-] -> 2002-
-// 19 [-] -> 2019-
-// 134 [-] -> 2134-
-// 201 [0] -> 2010-
-// 2016 [-] -> 2016-
-// 2045 [1] -> 2045-1
-// 2003 [3] -> 2003-03-
-// 2026 [-] -> 2026-09-
-// 2712- [0] -> 2712-0
-// 2077- [8] -> 2077-08-
-// 2026- [-] -> 2026-09-
-// 2022-0 [5] -> 2022-05-
-// 2017-1 [2] -> 2017-12-
-// 2034-1 [-] -> 2034-01-
-// 2019-1 [3] -> 2019-01-3
 const yr = (i) => (c, v) => {
   if (/[0-9]/.test(c)) {
     v.push(c);
@@ -162,16 +146,19 @@ export function init() {
     for (let i = 0; i < end; ++i) {
       const c = i < pos ? prev[i] : text[i - pos];
       const parser = DATE_PARSERS[val.length];
+      if (!parser) break;
       if (!parser(c, val)) --i;
     }
     
-    val = val.join("") + prev.substring(pos);
+    for (let i = pos; i < prev.length; ++i) {
+      const parser = DATE_PARSERS[val.length];
+      if (!parser) break;
+      if (!parser(prev[i], val)) --i;
+    }
+    
+    val = val.join("");
     
     dateInput.value = val;
     daysInput.dataset.prev = val;
-  });
-  
-  dateInput.addEventListener("input", (e) => {
-    dateInput.dataset.prev = e.target.value;
   });
 }
