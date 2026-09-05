@@ -137,7 +137,7 @@ export function init() {
     }
 
     e.preventDefault();
-    const prev = dateInput.dataset.prev ?? "";
+    const prev = dateInput.value;
     const text = e.data;
     const pos = dateInput.selectionStart;
     const end = pos + text.length;
@@ -159,6 +159,5 @@ export function init() {
     val = val.join("");
     
     dateInput.value = val;
-    daysInput.dataset.prev = val;
   });
 }
