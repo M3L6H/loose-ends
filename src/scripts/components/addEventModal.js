@@ -5,9 +5,9 @@ const yr = (i) => (c, v) => {
     v.push(c);
     return true;
   }
-  v.insert(0, getYear()[0]);
+  v.splice(0, 0, getYear()[0]);
   for (let j = i; i < 3; ++j) {
-    v.insert(0, "0");
+    v.splice(1, 0, "0");
   }
   return false;
 };
@@ -17,7 +17,7 @@ const insZero = (c, v) => {
     return true;
   }
 
-  v.insert(v.length - 1, "0");
+  v.splice(v.length - 1, 0, "0");
   return false;
 };
 const upTo = (n, altFn) => (c, v) => {
@@ -27,7 +27,7 @@ const upTo = (n, altFn) => (c, v) => {
       return true;
     }
 
-    v.insert(v.length - 1, "0");
+    v.splice(v.length - 1, 0, "0");
     v.push(c);
     return true;
   }
