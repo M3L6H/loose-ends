@@ -1,5 +1,12 @@
 import { getTimeZone } from "../settings/index.js";
 
+let modal;
+let nameInput;
+let dateInput;
+let descriptionInput;
+let outcomesInput;
+let submitButton;
+
 const yr = (i) => (c, v) => {
   if (/[0-9]/.test(c)) {
     v.push(c);
@@ -127,8 +134,16 @@ function getYear(d) {
   return (d ?? getNow()).toLocaleString("en-US", { year: "numeric" });
 }
 
+function checkValid() {
+  const nameValid = /[A-Za-z][-_A-Za-z ]*/.test(nameInput.value);
+  const dateValid = /[0-9]{4}-[0-9]{2}-[0-9]{2}T(?:[0-9]{2}:){2}[0-9]{2}/.test(dateInput.value);
+  const outcomesValid = (outcomesInput.value ?? "").length > 0;
+
+  submitButton.disabled = !(nameValid && dateValid && outcomesValid);
+}
+
 export function init() {
-  const modal = document.getElementById("add-event-modal");
+  modal = document.getElementById("add-event-modal");
 
   modal.addEventListener("open", () => {
     const dateInput = modal.querySelector("#event-date");
@@ -139,7 +154,13 @@ export function init() {
     dateInput.value = now;
   });
 
-  const dateInput = modal.querySelector("#event-date");
+  const form = modal.querySelector("form");
+  form.addEventListener("input", () => {
+    checkValid();
+  });
+
+  nameInput = modal.querySelector("#event-name");
+  dateInput = modal.querySelector("#event-date");
 
   dateInput.addEventListener("beforeinput", (e) => {
     if (e.inputType !== "insertText") {
@@ -170,4 +191,9 @@ export function init() {
 
     dateInput.value = val;
   });
+
+  descriptionInput = modal.querySelector("#event-description");
+  outcomesInput = modal.querySelector("#event-outcomes");
+  submitButton = modal.querySelector("button[type='submit']");
+  checkValid();
 }
