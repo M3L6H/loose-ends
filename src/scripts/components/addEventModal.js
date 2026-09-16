@@ -3,6 +3,8 @@ import { START, UPDATE, END, addEvent } from "../events/index.js";
 import { getTimeZone } from "../settings/index.js";
 import { hideModal } from "./modal.js";
 
+const MAX_DATE_CHARS = 19;
+
 let modal;
 let nameInput;
 let dateInput;
@@ -199,41 +201,45 @@ export function init() {
   nameInput = modal.querySelector("#event-name");
   dateInput = modal.querySelector("#event-date");
 
+  dateInput.addEventListener("focus", () => dateInput.select());
   dateInput.addEventListener("beforeinput", (e) => {
-    if (e.inputType !== "insertText") {
-      return;
-    }
-
+    if (e.inputType !== "insertText") return;
     e.preventDefault();
-    const prev = dateInput.value;
-    const text = e.data;
-    const pos = dateInput.selectionStart;
-    const end = pos + text.length;
-    let val = [];
-
-    for (let i = 0; i < end; ++i) {
-      const c = i < pos ? prev[i] : text[i - pos];
-      const parser = DATE_PARSERS[val.length];
-      if (!parser) break;
-      if (!parser(c, val)) --i;
-    }
-
-    for (let i = pos; i < prev.length; ++i) {
-      const parser = DATE_PARSERS[val.length];
-      if (!parser) break;
-      if (!parser(prev[i], val)) --i;
-    }
-
-    val = val.join("");
-
-    dateInput.value = val;
+    completeDate(e);
   });
+  dateInput.addEventListener("blur", (e) =>
+    completeDate({
+      ...e,
+      data: "$",
+    }),
+  );
 
   descriptionInput = modal.querySelector("#event-description");
   outcomesInput = modal.querySelector("#event-outcomes");
   submitButton = modal.querySelector("button[type='submit']");
 
   checkValid();
+}
+
+function completeDate(e) {
+  const pos = dateInput.selectionStart;
+  const prev =
+    dateInput.value.substring(0, pos) +
+    dateInput.value.substring(dateInput.selectionEnd);
+  const text = e.data;
+  const end = pos + text.length;
+  let val = [];
+
+  for (let i = 0; i < end; ++i) {
+    const c = i < pos ? prev[i] : text[i - pos];
+    const parser = DATE_PARSERS[val.length];
+    if (!parser) break;
+    if (!parser(c, val)) --i;
+  }
+
+  val = val.join("");
+
+  dateInput.value = val;
 }
 
 function parseDate(dateStr) {
