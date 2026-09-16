@@ -58,9 +58,8 @@ function resizeCanvas() {
 
 /**
  * Draw canvas content.
- * @param {number} scaleIndex - Index of scale in {@link SCALES}
  */
-function drawContent() {
+export function drawContent() {
   const ctx = canvas.getContext("2d");
   ctx.fillStyle = BACKGROUND_COLOR;
   ctx.fillRect(0, 0, canvas.width, canvas.height);

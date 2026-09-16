@@ -1,3 +1,5 @@
+import { drawContent } from "../canvas/index.js";
+import { START, UPDATE, END, addEvent } from "../events/index.js";
 import { getTimeZone } from "../settings/index.js";
 
 let modal;
@@ -158,6 +160,35 @@ export function init() {
   form.addEventListener("input", () => {
     checkValid();
   });
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const event = {
+      name: nameInput.value,
+      timestamp: Temporal.ZonedDateTime.from({
+        timeZone: getTimeZone(),
+        plainDateTime: dateInput.value,
+      }).epochMilliseconds,
+      description: descriptionInput.value,
+      threads: outcomesInput.value.split(/\s*\n\s*/).reduce((obj, line) => {
+        const [outcome, thread] = line.split(/\s+/);
+        switch (outcome.toLowerCase()) {
+          case "create":
+          case "start":
+            obj[thread] = START;
+            break;
+          case "update":
+            obj[thread] = UPDATE;
+            break;
+          case "end":
+            obj[thread] = END;
+            break;
+        }
+        return obj;
+      }, {}),
+    };
+    addEvent(event);
+    drawContent();
+  });
 
   nameInput = modal.querySelector("#event-name");
   dateInput = modal.querySelector("#event-date");
@@ -195,5 +226,6 @@ export function init() {
   descriptionInput = modal.querySelector("#event-description");
   outcomesInput = modal.querySelector("#event-outcomes");
   submitButton = modal.querySelector("button[type='submit']");
+ 
   checkValid();
 }

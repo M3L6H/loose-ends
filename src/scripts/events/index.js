@@ -1,9 +1,9 @@
-import { sortInPlace } from "../algs/index.js";
+import { insertInSortedArr, sortInPlace } from "../algs/index.js";
 import { getTimeZone } from "../settings/index.js";
 
-const START = "start";
-const UPDATE = "update";
-const END = "end";
+export const START = "start";
+export const UPDATE = "update";
+export const END = "end";
 
 /**
  * @typedef {Object} Event
@@ -105,6 +105,12 @@ let events = [
 
 let enrichedEvents = null;
 
+const eventCmp = (a, b) => a.timestamp - b.timestamp;
+
+export function addEvent(event) {
+  insertInSortedArr(event, getEvents(), eventCmp);
+}
+
 /**
  * Returns whether the event is the start of the given timeline.
  *
@@ -136,7 +142,7 @@ export function getEvents() {
       ...event,
       timestamp: Temporal.ZonedDateTime.from(event.date).epochMilliseconds,
     }));
-    sortInPlace(enrichedEvents, (a, b) => a.timestamp - b.timestamp);
+    sortInPlace(enrichedEvents, eventCmp);
   }
 
   return enrichedEvents;
