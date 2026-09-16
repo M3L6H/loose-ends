@@ -1,3 +1,12 @@
+export function hideModal(id) {
+  const modal = document.getElementById(id);
+
+  if (!modal) return;
+  
+  modal.classList.add("hidden");
+  modal.dispatchEvent(new Event("close"));
+}
+
 export function showModal(id) {
   const modal = document.getElementById(id);
 
@@ -14,11 +23,7 @@ export function init() {
     const form = modal.querySelector("form");
 
     closeBtn.addEventListener("click", () => {
-      modal.classList.add("hidden");
-
-      if (!!form) {
-        form.reset();
-      }
+      hideModal(modal.id);
     });
   });
 }

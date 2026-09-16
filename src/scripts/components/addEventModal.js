@@ -1,6 +1,7 @@
 import { drawContent } from "../canvas/index.js";
 import { START, UPDATE, END, addEvent } from "../events/index.js";
 import { getTimeZone } from "../settings/index.js";
+import { hideModal } from "./modal.js";
 
 let modal;
 let nameInput;
@@ -188,6 +189,7 @@ export function init() {
     };
     addEvent(event);
     drawContent();
+    hideModal("add-event-modal");
   });
 
   nameInput = modal.querySelector("#event-name");
