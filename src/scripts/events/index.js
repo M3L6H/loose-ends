@@ -107,8 +107,36 @@ let enrichedEvents = null;
 
 const eventCmp = (a, b) => a.timestamp - b.timestamp;
 
+/**
+ * Add an event to the list of events.
+ *
+ * @param {Event} event - The event to add
+ *
+ * @returns {Event[]} The updated list of events
+ */
 export function addEvent(event) {
   insertInSortedArr(enrichEvent(event), getEvents(), eventCmp);
+  return getEvents();
+}
+
+/**
+ * Returns an unordered array of active threads at the given date.
+ *
+ * @param {Event} event - The date of the event to look up
+ */
+export function getThreadsAtDate(eventDate) {
+  const timestamp = timestampFromDate(eventDate);
+  const threads = new Set();
+  getEvents().forEach((e) => {
+    for (const thread in e.threads ?? {}) {
+      if (e.timestamp < timestamp && e.threads[thread] === START) {
+        threads.add(thread);
+      } else if (e.timestamp > timestamp && e.threads[thread] === END) {
+        threads.delete(thread);
+      }
+    }
+  });
+  return Array.from(threads);
 }
 
 /**
@@ -153,6 +181,17 @@ export function getEvents() {
 function enrichEvent(event) {
   return {
     ...event,
-    timestamp: Temporal.ZonedDateTime.from(event.date).epochMilliseconds,
+    timestamp: timestampFromDate(event.date),
   };
+}
+
+/**
+ * Calculate epoch timestamp from date
+ *
+ * @param {object} eventDate - The date object to calculate from
+ *
+ * @returns {number} timestamp in epoch milliseconds
+ */
+function timestampFromDate(eventDate) {
+  return Temporal.ZonedDateTime.from(eventDate).epochMilliseconds;
 }

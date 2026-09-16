@@ -116,6 +116,37 @@ const DATE_PARSERS = [
   insZero(59),
 ];
 
+const modifiers = ["Create ", "End ", "Start ", "Update "];
+
+function parsePartialOutcomeModifier(c, v, outcomeStartIdx, mod) {
+  for (let i = v.length - outcomeStartIdx; i < mod.length; ++i) {
+    const ch = mod[i];
+    v.push(ch);
+    if (ch === c) return true;
+  }
+  return false;
+}
+
+function parseOutcomeModifier(c, v) {
+  if (v.length === 0 || v[v.length - 1] === "\n") {
+    for (const m of modifiers) {
+      if (c.toUpperCase() === m[0]) {
+        v.push(m[0]);
+      }
+    }
+    return true;
+  }
+
+  const outcomeStartIdx = v.lastIndexOf("\n") + 1;
+  for (const m of modifiers) {
+    if (v[outcomeStartIdx] === m[0]) {
+      return parsePartialOutcomeModifier(c, v, outcomeStartIdx, m);
+    }
+  }
+
+  return true;
+}
+
 function getNow() {
   return Temporal.Now.zonedDateTimeISO(getTimeZone());
 }
@@ -171,31 +202,7 @@ export function init() {
   });
   form.addEventListener("submit", (e) => {
     e.preventDefault();
-    const event = {
-      name: nameInput.value,
-      date: parseDate(dateInput.value),
-      description: descriptionInput.value,
-      threads: outcomesInput.value.split(/\s*\n\s*/).reduce((obj, line) => {
-        const [outcome, ...threadParts] = line.split(/\s+/);
-        const thread = threadParts.join(" ");
-        switch (outcome.toLowerCase()) {
-          case "create":
-          case "start":
-            obj[thread] = START;
-            break;
-          case "update":
-            obj[thread] = UPDATE;
-            break;
-          case "end":
-            obj[thread] = END;
-            break;
-        }
-        return obj;
-      }, {}),
-    };
-    addEvent(event);
-    drawContent();
-    hideModal("add-event-modal");
+    submit();
   });
 
   nameInput = modal.querySelector("#event-name");
@@ -215,10 +222,45 @@ export function init() {
   );
 
   descriptionInput = modal.querySelector("#event-description");
+
   outcomesInput = modal.querySelector("#event-outcomes");
+  outcomesInput.addEventListener("beforeinput", (e) => {
+    if (e.inputType !== "insertText") return;
+    e.preventDefault();
+    completeOutcomes(e);
+  });
+
   submitButton = modal.querySelector("button[type='submit']");
 
   checkValid();
+}
+
+function submit() {
+  const event = {
+    name: nameInput.value,
+    date: parseDate(dateInput.value),
+    description: descriptionInput.value,
+    threads: outcomesInput.value.split(/\s*\n\s*/).reduce((obj, line) => {
+      const [outcome, ...threadParts] = line.split(/\s+/);
+      const thread = threadParts.join(" ");
+      switch (outcome.toLowerCase()) {
+        case "create":
+        case "start":
+          obj[thread] = START;
+          break;
+        case "update":
+          obj[thread] = UPDATE;
+          break;
+        case "end":
+          obj[thread] = END;
+          break;
+      }
+      return obj;
+    }, {}),
+  };
+  addEvent(event);
+  drawContent();
+  hideModal("add-event-modal");
 }
 
 function completeDate(e) {
@@ -238,8 +280,23 @@ function completeDate(e) {
   }
 
   val = val.join("");
-
   dateInput.value = val;
+}
+
+function completeOutcomes(e) {
+  const prev = outcomesInput.value;
+  const pos = outcomesInput.selectionStart;
+  const text = e.data;
+  const end = pos + text.length;
+  let val = [];
+
+  for (let i = 0; i < end; ++i) {
+    const c = i < pos ? prev[i] : text[i - pos];
+    parseOutcomeModifier(c, val);
+  }
+
+  val = val.join("");
+  outcomesInput.value = val;
 }
 
 function parseDate(dateStr) {
