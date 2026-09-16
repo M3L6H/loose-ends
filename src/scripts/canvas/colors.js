@@ -552,11 +552,73 @@ const COLORS = {
 };
 
 export const BACKGROUND_COLOR = COLORS.background.dark.color;
-export const CURR_DATE_COLOR = COLORS.secondary.dark.color;
+export const CURR_DATE_COLOR = COLORS.error_container.dark.color;
 export const EVENT_COLOR = COLORS.primary.dark.color;
 export const GRID_COLOR = COLORS.outline_variant.dark.color;
 export const THREAD_COLOR = COLORS.secondary.dark.color;
 export const THREAD_TEXT_COLOR = COLORS.on_background.dark.color;
+
+// Helper for sRGB linearized conversion (WCAG formula)
+const toLinear = (val) =>
+  val <= 0.04045 ? val / 12.92 : Math.pow((val + 0.055) / 1.055, 2.4);
+const toSRGB = (val) =>
+  val <= 0.0031308 ? val * 12.92 : 1.055 * Math.pow(val, 1 / 2.4) - 0.055;
+const toHex = (x) =>
+  Math.max(0, Math.min(255, x)).toString(16).padStart(2, "0");
+
+function clampHexLuminance(hex, minLum = 0, maxLum = 1) {
+  // Clean hex and convert to standard RGB (0-1)
+  let c = hex.replace(/^#/, "");
+  if (c.length === 3) {
+    c = c
+      .split("")
+      .map((x) => x + x)
+      .join("");
+  }
+  let r = parseInt(c.substring(0, 2), 16) / 255;
+  let g = parseInt(c.substring(2, 4), 16) / 255;
+  let b = parseInt(c.substring(4, 6), 16) / 255;
+
+  // 2. Linearize RGB components to calculate true luminance
+  let rLin = toLinear(r);
+  let gLin = toLinear(g);
+  let bLin = toLinear(b);
+
+  // 3. Calculate Relative Luminance
+  let currentLum = 0.2126 * rLin + 0.7152 * gLin + 0.0722 * bLin;
+
+  // Handle pure black base case to prevent division by zero when brightening
+  if (currentLum === 0 && minLum > 0) {
+    rLin = gLin = bLin = minLum;
+    currentLum = minLum;
+  }
+
+  // 4. Determine target luminance and scale linear channels
+  let targetLum = Math.max(minLum, Math.min(maxLum, currentLum));
+
+  if (currentLum !== targetLum) {
+    let scale = targetLum / currentLum;
+    rLin *= scale;
+    gLin *= scale;
+    bLin *= scale;
+
+    // Clip overflows if scaling forces a channel beyond maximum intensity
+    rLin = Math.min(1, rLin);
+    gLin = Math.min(1, gLin);
+    bLin = Math.min(1, bLin);
+  }
+
+  // 5. Convert back to standard sRGB space and format to Hex
+  const rOut = Math.round(toSRGB(rLin) * 255);
+  const gOut = Math.round(toSRGB(gLin) * 255);
+  const bOut = Math.round(toSRGB(bLin) * 255);
+
+  return `#${toHex(rOut)}${toHex(gOut)}${toHex(bOut)}`;
+}
+
+export function isDarkMode() {
+  return true;
+}
 
 /**
  * Convert a string to a deterministic color.
@@ -572,11 +634,14 @@ export function stringToColor(str) {
     hash = str.charCodeAt(i) + ((hash << 5) - hash);
   }
 
-  let colour = "#";
+  let color = "#";
   for (let i = 0; i < 3; i++) {
     const value = (hash >> (i * 8)) & 0xff;
-    colour += value.toString(16).padStart(2, "0");
+    color += value.toString(16).padStart(2, "0");
   }
 
-  return colour;
+  const minLum = isDarkMode() ? 0.4 : 0;
+  const maxLum = isDarkMode() ? 1 : 0.6;
+
+  return clampHexLuminance(color, minLum, maxLum);
 }

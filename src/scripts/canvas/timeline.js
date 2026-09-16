@@ -7,6 +7,7 @@ import {
   getNumRows,
 } from "./grid.js";
 
+const CURR_DATETIME_THICKNESS = 2;
 const TIMELINE_BOTTOM_MARGIN = 16;
 const TIMELINE_THICKNESS = 2;
 const TIMELINE_V_OFFSET = 24;
@@ -93,13 +94,13 @@ function drawCurrentDateLine(ctx, centeredOn, scaleMs) {
 
   drawStraightLineThroughGridPoints(
     (ctx) => {
-      ctx.lineWidth = TIMELINE_THICKNESS;
+      ctx.lineWidth = CURR_DATETIME_THICKNESS;
       ctx.strokeStyle = CURR_DATE_COLOR;
       ctx.stroke();
     },
     ctx,
     [
-      [x, -0.5],
+      [x, -0.4],
       [x, rows],
     ],
   );
