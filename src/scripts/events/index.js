@@ -108,7 +108,7 @@ let enrichedEvents = null;
 const eventCmp = (a, b) => a.timestamp - b.timestamp;
 
 export function addEvent(event) {
-  insertInSortedArr(event, getEvents(), eventCmp);
+  insertInSortedArr(enrichEvent(event), getEvents(), eventCmp);
 }
 
 /**
@@ -138,12 +138,21 @@ export function isThreadEnd(event, thread) {
  */
 export function getEvents() {
   if (!enrichedEvents) {
-    enrichedEvents = events.map((event) => ({
-      ...event,
-      timestamp: Temporal.ZonedDateTime.from(event.date).epochMilliseconds,
-    }));
+    enrichedEvents = events.map(enrichEvent);
     sortInPlace(enrichedEvents, eventCmp);
   }
 
   return enrichedEvents;
+}
+
+/**
+ * Enrich event with timestamp
+ *
+ * @param {Event} event - The event to enrich
+ */
+function enrichEvent(event) {
+  return {
+    ...event,
+    timestamp: Temporal.ZonedDateTime.from(event.date).epochMilliseconds,
+  };
 }

@@ -21,21 +21,23 @@ const yr = (i) => (c, v) => {
   }
   return false;
 };
-const insZero = (max, min = 0) => (c, v) => {
-  if (/[0-9]/.test(c)) {
-    const n = parseInt(v[v.length - 1] + c);
-    
-    if (n >= min && n <= max) {
-      v.push(c);
-      return true;
-    } 
-  }
+const insZero =
+  (max, min = 0) =>
+  (c, v) => {
+    if (/[0-9]/.test(c)) {
+      const n = parseInt(v[v.length - 1] + c);
 
-  const lastI = v.length;
-  v.splice(v.length - 1, 0, "0");
-  v[lastI] = `${Math.max(parseInt(v[lastI]), min)}`;
-  return false;
-};
+      if (n >= min && n <= max) {
+        v.push(c);
+        return true;
+      }
+    }
+
+    const lastI = v.length;
+    v.splice(v.length - 1, 0, "0");
+    v[lastI] = `${Math.max(parseInt(v[lastI]), min)}`;
+    return false;
+  };
 const isLeap = (v) => {
   const year = parseInt(v[0] + v[1] + v[2] + v[3]);
   const isCentury = year % 100 === 0;
@@ -75,10 +77,12 @@ const upToDay = (c, v) => {
   const mo = parseInt(v[5] + v[6]);
   return upTo(mo === 2 ? 2 : 3, getDay)(c, v);
 };
-const sep = (s, ...alt) => (c, v) => {
-  v.push(s);
-  return s === c || alt.includes(c);
-};
+const sep =
+  (s, ...alt) =>
+  (c, v) => {
+    v.push(s);
+    return s === c || alt.includes(c);
+  };
 const DATE_PARSERS = [
   (c, v) => {
     if (/[0-9]/.test(c)) {
@@ -139,7 +143,9 @@ function getYear(d) {
 
 function checkValid() {
   const nameValid = /[A-Za-z][-_A-Za-z ]*/.test(nameInput.value);
-  const dateValid = /[0-9]{4}-[0-9]{2}-[0-9]{2}T(?:[0-9]{2}:){2}[0-9]{2}/.test(dateInput.value);
+  const dateValid = /[0-9]{4}-[0-9]{2}-[0-9]{2}T(?:[0-9]{2}:){2}[0-9]{2}/.test(
+    dateInput.value,
+  );
   const outcomesValid = (outcomesInput.value ?? "").length > 0;
 
   submitButton.disabled = !(nameValid && dateValid && outcomesValid);
@@ -165,13 +171,11 @@ export function init() {
     e.preventDefault();
     const event = {
       name: nameInput.value,
-      timestamp: Temporal.ZonedDateTime.from({
-        timeZone: getTimeZone(),
-        plainDateTime: dateInput.value,
-      }).epochMilliseconds,
+      date: parseDate(dateInput.value),
       description: descriptionInput.value,
       threads: outcomesInput.value.split(/\s*\n\s*/).reduce((obj, line) => {
-        const [outcome, thread] = line.split(/\s+/);
+        const [outcome, ...threadParts] = line.split(/\s+/);
+        const thread = threadParts.join(" ");
         switch (outcome.toLowerCase()) {
           case "create":
           case "start":
@@ -228,6 +232,19 @@ export function init() {
   descriptionInput = modal.querySelector("#event-description");
   outcomesInput = modal.querySelector("#event-outcomes");
   submitButton = modal.querySelector("button[type='submit']");
- 
+
   checkValid();
+}
+
+function parseDate(dateStr) {
+  const date = Temporal.PlainDateTime.from(dateStr);
+  return {
+    year: date.year,
+    month: date.month,
+    day: date.day,
+    hour: date.hour,
+    minute: date.minute,
+    second: date.second,
+    timeZone: getTimeZone(),
+  };
 }

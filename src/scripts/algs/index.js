@@ -32,10 +32,8 @@ export function insertInSortedArr(elt, arr, cmp) {
   // bSearch returns the index of the closest smaller element or -1
   // We need to insert after that index
   const insertIndex = i + 1;
-  const res = arr.slice(0, insertIndex);
-  res.push(elt);
-  res.push(...arr.slice(insertIndex));
-  return res;
+  arr.splice(insertIndex, 0, elt);
+  return arr;
 }
 
 /**
