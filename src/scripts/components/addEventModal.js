@@ -9,6 +9,8 @@ import {
 import { getTimeZone } from "../settings/index.js";
 import { hideModal } from "./modal.js";
 
+const NAME_REGEX = /[A-Za-z][-_A-Za-z ]*/;
+
 let modal;
 let nameInput;
 let dateInput;
@@ -124,7 +126,7 @@ const DATE_PARSERS = [
 
 const modifiers = ["Start ", "Update ", "End "];
 
-const isStart = (modifier) => modifier === "Start ";
+const isStart = (modifier) => modifier.trim() === "Start";
 
 function parsePartialOutcomeModifier(c, v, mod) {
   for (let i = v.length; i < mod.length; ++i) {
@@ -179,16 +181,6 @@ function getMonth(d) {
 
 function getYear(d) {
   return (d ?? getNow()).toLocaleString("en-US", { year: "numeric" });
-}
-
-function checkValid() {
-  const nameValid = /[A-Za-z][-_A-Za-z ]*/.test(nameInput.value);
-  const dateValid = /[0-9]{4}-[0-9]{2}-[0-9]{2}T(?:[0-9]{2}:){2}[0-9]{2}/.test(
-    dateInput.value,
-  );
-  const outcomesValid = (outcomesInput.value ?? "").length > 0;
-
-  submitButton.disabled = !(nameValid && dateValid && outcomesValid);
 }
 
 export function init() {
@@ -395,4 +387,24 @@ function updateThreadSuggestions(suggestions) {
   });
   threadSuggestions.replaceWith(newSuggestions);
   threadSuggestions = newSuggestions;
+}
+
+function isOutcomeValid(outcome) {
+  const [modifier, thread] = outcome.split(/\s+/);
+  const isValidModifier = modifiers.includes(modifier + " ");
+  const isModifierStart = isStart(modifier);
+  const isThreadValid =
+    (isModifierStart && NAME_REGEX.test(thread)) || threads.includes(thread);
+  console.log(isValidModifier, isModifierStart, isThreadValid);
+  return isValidModifier && isThreadValid;
+}
+
+function checkValid() {
+  const nameValid = NAME_REGEX.test(nameInput.value);
+  const dateValid = /[0-9]{4}-[0-9]{2}-[0-9]{2}T(?:[0-9]{2}:){2}[0-9]{2}/.test(
+    dateInput.value,
+  );
+  const outcomesValid = isOutcomeValid(outcomesInput.value);
+
+  submitButton.disabled = !(nameValid && dateValid && outcomesValid);
 }
