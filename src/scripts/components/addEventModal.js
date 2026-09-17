@@ -197,6 +197,8 @@ export function init() {
     });
     dateInput.placeholder = now;
     dateInput.value = now;
+    updateThreads();
+    updateThreadSuggestions(modifiers);
   });
 
   const form = modal.querySelector("form");
@@ -238,7 +240,6 @@ export function init() {
   threadSuggestions = document.getElementById("thread-suggestions");
 
   checkValid();
-  updateThreads();
 }
 
 function submit() {

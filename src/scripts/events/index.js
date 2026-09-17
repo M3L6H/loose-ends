@@ -131,7 +131,7 @@ export function getThreadsAtDate(eventDate) {
     for (const thread in e.threads ?? {}) {
       if (e.timestamp < timestamp && e.threads[thread] === START) {
         threads.add(thread);
-      } else if (e.timestamp > timestamp && e.threads[thread] === END) {
+      } else if (e.timestamp < timestamp && e.threads[thread] === END) {
         threads.delete(thread);
       }
     }
