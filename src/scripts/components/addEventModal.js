@@ -1,5 +1,5 @@
 import { drawContent } from "../canvas/index.js";
-import { START, UPDATE, END, addEvent } from "../events/index.js";
+import { START, UPDATE, END, addEvent, getThreadsAtDate } from "../events/index.js";
 import { getTimeZone } from "../settings/index.js";
 import { hideModal } from "./modal.js";
 
@@ -10,7 +10,9 @@ let nameInput;
 let dateInput;
 let descriptionInput;
 let outcomesInput;
+let threadSuggestions;
 let submitButton;
+let threads = [];
 
 const yr = (i) => (c, v) => {
   if (/[0-9]/.test(c)) {
@@ -116,10 +118,12 @@ const DATE_PARSERS = [
   insZero(59),
 ];
 
-const modifiers = ["Create ", "End ", "Start ", "Update "];
+const modifiers = ["End ", "Start ", "Update "];
 
-function parsePartialOutcomeModifier(c, v, outcomeStartIdx, mod) {
-  for (let i = v.length - outcomeStartIdx; i < mod.length; ++i) {
+const isStart = (modifier) => modifier === "Start ";
+
+function parsePartialOutcomeModifier(c, v, mod) {
+  for (let i = v.length; i < mod.length; ++i) {
     const ch = mod[i];
     v.push(ch);
     if (ch === c) return true;
@@ -128,7 +132,7 @@ function parsePartialOutcomeModifier(c, v, outcomeStartIdx, mod) {
 }
 
 function parseOutcomeModifier(c, v) {
-  if (v.length === 0 || v[v.length - 1] === "\n") {
+  if (v.length === 0) {
     for (const m of modifiers) {
       if (c.toUpperCase() === m[0]) {
         v.push(m[0]);
@@ -137,10 +141,9 @@ function parseOutcomeModifier(c, v) {
     return true;
   }
 
-  const outcomeStartIdx = v.lastIndexOf("\n") + 1;
   for (const m of modifiers) {
-    if (v[outcomeStartIdx] === m[0]) {
-      return parsePartialOutcomeModifier(c, v, outcomeStartIdx, m);
+    if (v[0] === m[0]) {
+      return parsePartialOutcomeModifier(c, v, m);
     }
   }
 
@@ -214,12 +217,13 @@ export function init() {
     e.preventDefault();
     completeDate(e);
   });
-  dateInput.addEventListener("blur", (e) =>
+  dateInput.addEventListener("blur", (e) => {
     completeDate({
       ...e,
       data: "$",
-    }),
-  );
+    });
+    updateThreads();
+  });
 
   descriptionInput = modal.querySelector("#event-description");
 
@@ -231,8 +235,10 @@ export function init() {
   });
 
   submitButton = modal.querySelector("button[type='submit']");
+  threadSuggestions = document.getElementById("thread-suggestions");
 
   checkValid();
+  updateThreads();
 }
 
 function submit() {
@@ -289,10 +295,37 @@ function completeOutcomes(e) {
   const text = e.data;
   const end = pos + text.length;
   let val = [];
+  let parseModifier = true;
+  let modifier = "";
 
   for (let i = 0; i < end; ++i) {
     const c = i < pos ? prev[i] : text[i - pos];
-    parseOutcomeModifier(c, val);
+    if (parseModifier) {
+      if (!parseOutcomeModifier(c, val)) --i;
+      parseModifier = val[val.length - 1] !== " ";
+      
+      if (!parseModifier) {
+        modifier = val.join("");
+        if (isStart(modifier)) {
+          updateThreadSuggestions([]);
+        } else {
+          updateThreadSuggestions(threads);
+        }
+      }
+      continue;
+    }
+
+    if (isStart(modifier)) {
+      v.push(c);
+    } else {
+      const newVal = val.join("") + c;
+      const filtered = threads.filter(t => {
+        return `${modifier}${t}`.startsWith(newVal);
+      });
+      if (filtered.length > 0) {
+        val.push(c);
+      }
+    }
   }
 
   val = val.join("");
@@ -310,4 +343,17 @@ function parseDate(dateStr) {
     second: date.second,
     timeZone: getTimeZone(),
   };
+}
+
+function updateThreads() {
+  threads = getThreadsAtDate(parseDate(dateInput.value));
+}
+
+function updateThreadSuggestions(suggestions) {
+  threadSuggestions.innerHTML = "";
+  suggestions.forEach(suggestion => {
+    const option = document.createElement('option');
+    option.value = suggestion;
+    threadSuggestions.appendChild(option);
+  });
 }
