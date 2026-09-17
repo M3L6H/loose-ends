@@ -15,7 +15,7 @@ let modal;
 let nameInput;
 let dateInput;
 let descriptionInput;
-let outcomesInput;
+let outcomesFieldset;
 let threadSuggestions;
 let submitButton;
 let threads = [];
@@ -214,7 +214,7 @@ export function init() {
     if (e.inputType !== "insertText") return;
     e.preventDefault();
     completeDate(e);
-    outcomesInput.dispatchEvent(new Event("input"));
+    e.target.dispatchEvent(new Event("input"));
   });
   dateInput.addEventListener("blur", (e) => {
     completeDate({
@@ -226,28 +226,10 @@ export function init() {
 
   descriptionInput = modal.querySelector("#event-description");
 
-  outcomesInput = modal.querySelector("#event-outcomes");
-  outcomesInput.addEventListener("beforeinput", (e) => {
-    if (e.inputType !== "insertText") return;
-    e.preventDefault();
-    completeOutcomes(e);
-    outcomesInput.dispatchEvent(
-      new Event("input", {
-        bubbles: true,
-      }),
-    );
-  });
-  outcomesInput.addEventListener("input", () => {
-    const [modifier, thread] = outcomesInput.value.split(/\s+/);
-    if (thread === undefined) {
-      updateThreadSuggestions(modifiers);
-    } else {
-      const filtered = filterThreadOutcomes(
-        modifier + " ",
-        outcomesInput.value,
-      );
-      updateThreadSuggestions(filtered);
-    }
+  outcomesFieldset = modal.querySelector("#event-outcomes");
+  outcomesFieldset.querySelectorAll("input").forEach((outcomeInput) => {
+    outcomeInput.addEventListener("beforeinput", outcomeBeforeInputListener);
+    outcomeInput.addEventListener("input", outcomeInputListener);
   });
 
   submitButton = modal.querySelector("button[type='submit']");
@@ -304,9 +286,72 @@ function completeDate(e) {
   dateInput.value = val;
 }
 
+function outcomeBeforeInputListener(e) {
+  if (e.inputType !== "insertText") return;
+  e.preventDefault();
+  completeOutcomes(e);
+  e.target.dispatchEvent(
+    new Event("input", {
+      bubbles: true,
+    }),
+  );
+}
+
+function outcomeInputListener(e) {
+  const { value } = e.target;
+  const [modifier, thread] = value.split(/\s+/);
+  if (thread === undefined) {
+    updateThreadSuggestions(modifiers);
+  } else {
+    const filtered = isStart(modifier)
+      ? []
+      : filterThreadOutcomes(modifier + " ", value);
+    updateThreadSuggestions(filtered);
+  }
+
+  e.target.showPicker();
+
+  const outcomes = outcomesFieldset.querySelectorAll("input");
+
+  if (isOutcomeValid(value)) {
+    if (parseInt(e.target.dataset.outcomeId) === outcomes.length) {
+      appendOutcomeInput();
+    }
+  } else if (parseInt(e.target.dataset.outcomeId) === outcomes.length - 1) {
+    popOutcomeInput();
+  }
+}
+
+function appendOutcomeInput() {
+  const inputs = outcomesFieldset.querySelectorAll("input");
+  const id = inputs.length + 1;
+
+  const input = document.createElement("input");
+  input.dataset.outcomeId = id;
+  input.id = `outcome-${id}`;
+  input.placeholder = "Start My New Thread";
+  input.setAttribute("list", "thread-suggestions");
+  input.addEventListener("beforeinput", outcomeBeforeInputListener);
+  input.addEventListener("input", outcomeInputListener);
+
+  const label = document.createElement("label");
+  label.setAttribute("for", input.id);
+  label.innerText = `Outcome ${id}`;
+
+  outcomesFieldset.appendChild(label);
+  outcomesFieldset.appendChild(input);
+}
+
+function popOutcomeInput() {
+  const inputs = outcomesFieldset.querySelectorAll("input");
+  inputs[inputs.length - 1].remove();
+  const labels = outcomesFieldset.querySelectorAll("label");
+  labels[labels.length - 1].remove();
+}
+
 function completeOutcomes(e) {
-  const prev = outcomesInput.value;
-  const pos = outcomesInput.selectionStart;
+  const prev = e.target.value;
+  const pos = e.target.selectionStart;
   const text = e.data;
   const end = pos + text.length;
   let val = [];
@@ -346,7 +391,7 @@ function completeOutcomes(e) {
   }
 
   val = val.join("");
-  outcomesInput.value = val;
+  e.target.value = val;
 }
 
 /**
@@ -393,9 +438,8 @@ function isOutcomeValid(outcome) {
   const [modifier, thread] = outcome.split(/\s+/);
   const isValidModifier = modifiers.includes(modifier + " ");
   const isModifierStart = isStart(modifier);
-  const isThreadValid =
-    (isModifierStart && NAME_REGEX.test(thread)) || threads.includes(thread);
-  console.log(isValidModifier, isModifierStart, isThreadValid);
+  const isValidStartThread = isModifierStart && NAME_REGEX.test(thread ?? "");
+  const isThreadValid = isValidStartThread || threads.includes(thread);
   return isValidModifier && isThreadValid;
 }
 
@@ -404,7 +448,10 @@ function checkValid() {
   const dateValid = /[0-9]{4}-[0-9]{2}-[0-9]{2}T(?:[0-9]{2}:){2}[0-9]{2}/.test(
     dateInput.value,
   );
-  const outcomesValid = isOutcomeValid(outcomesInput.value);
+  const outcomes = [...outcomesFieldset.querySelectorAll("input")];
+  const outcomesValid =
+    outcomes.every(({ value }) => value === "" || isOutcomeValid(value)) &&
+    outcomes.length > 1;
 
   submitButton.disabled = !(nameValid && dateValid && outcomesValid);
 }

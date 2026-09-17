@@ -53,8 +53,11 @@
               <textarea id="event-description"></textarea>
             </div>
             <div class="form-input required">
-              <label for="event-outcomes">Outcomes</label>
-              <input id="event-outcomes" placeholder="Start My New Thread" list="thread-suggestions"></input>
+              <fieldset id="event-outcomes">
+                <legend>Outcomes</legend>
+                <label for="outcome-1">Outcome 1</label>
+                <input data-outcome-id="1" id="outcome-1" placeholder="Start My New Thread" list="thread-suggestions"></input>
+              </fieldset>
               <datalist id="thread-suggestions"></datalist>
             </div>
             <button type="submit">
