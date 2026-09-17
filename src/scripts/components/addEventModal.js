@@ -1,5 +1,11 @@
 import { drawContent } from "../canvas/index.js";
-import { START, UPDATE, END, addEvent, getThreadsAtDate } from "../events/index.js";
+import {
+  START,
+  UPDATE,
+  END,
+  addEvent,
+  getThreadsAtDate,
+} from "../events/index.js";
 import { getTimeZone } from "../settings/index.js";
 import { hideModal } from "./modal.js";
 
@@ -304,27 +310,34 @@ function completeOutcomes(e) {
     if (parseModifier) {
       if (!parseOutcomeModifier(c, val)) --i;
       parseModifier = val[val.length - 1] !== " ";
-      
+
       if (!parseModifier) {
         modifier = val.join("");
         if (isStart(modifier)) {
           updateThreadSuggestions([]);
         } else {
-          updateThreadSuggestions(threads);
+          updateThreadSuggestions(threads.map((t) => `${modifier}${t}`));
         }
       }
       continue;
     }
 
     if (isStart(modifier)) {
-      v.push(c);
+      val.push(c);
     } else {
-      const newVal = val.join("") + c;
-      const filtered = threads.filter(t => {
-        return `${modifier}${t}`.startsWith(newVal);
-      });
+      const newVal = (val.join("") + c).toLowerCase();
+      const filtered = threads
+        .map((t) => `${modifier}${t}`)
+        .filter((t) => {
+          return t.toLowerCase().startsWith(newVal);
+        });
+      if (filtered.length === 1) {
+        val = filtered[0].split("");
+        break;
+      }
       if (filtered.length > 0) {
-        val.push(c);
+        val.push(filtered[0][val.length]);
+        updateThreadSuggestions(filtered);
       }
     }
   }
@@ -333,6 +346,11 @@ function completeOutcomes(e) {
   outcomesInput.value = val;
 }
 
+/**
+ * Parse a (ISO-8061) date string into date parts.
+ *
+ * @param {string} dateStr - The date string to parse
+ */
 function parseDate(dateStr) {
   const date = Temporal.PlainDateTime.from(dateStr);
   return {
@@ -351,10 +369,13 @@ function updateThreads() {
 }
 
 function updateThreadSuggestions(suggestions) {
-  threadSuggestions.innerHTML = "";
-  suggestions.forEach(suggestion => {
-    const option = document.createElement('option');
+  const newSuggestions = threadSuggestions.cloneNode(true);
+  newSuggestions.innerHTML = "";
+  suggestions.forEach((suggestion) => {
+    const option = document.createElement("option");
     option.value = suggestion;
-    threadSuggestions.appendChild(option);
+    newSuggestions.appendChild(option);
   });
+  threadSuggestions.replaceWith(newSuggestions);
+  threadSuggestions = newSuggestions;
 }
