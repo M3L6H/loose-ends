@@ -9,8 +9,6 @@ import {
 import { getTimeZone } from "../settings/index.js";
 import { hideModal } from "./modal.js";
 
-const MAX_DATE_CHARS = 19;
-
 let modal;
 let nameInput;
 let dateInput;
@@ -124,7 +122,7 @@ const DATE_PARSERS = [
   insZero(59),
 ];
 
-const modifiers = ["End ", "Start ", "Update "];
+const modifiers = ["Start ", "Update ", "End "];
 
 const isStart = (modifier) => modifier === "Start ";
 
@@ -224,6 +222,7 @@ export function init() {
     if (e.inputType !== "insertText") return;
     e.preventDefault();
     completeDate(e);
+    outcomesInput.dispatchEvent(new Event("input"));
   });
   dateInput.addEventListener("blur", (e) => {
     completeDate({
@@ -240,6 +239,23 @@ export function init() {
     if (e.inputType !== "insertText") return;
     e.preventDefault();
     completeOutcomes(e);
+    outcomesInput.dispatchEvent(
+      new Event("input", {
+        bubbles: true,
+      }),
+    );
+  });
+  outcomesInput.addEventListener("input", () => {
+    const [modifier, thread] = outcomesInput.value.split(/\s+/);
+    if (thread === undefined) {
+      updateThreadSuggestions(modifiers);
+    } else {
+      const filtered = filterThreadOutcomes(
+        modifier + " ",
+        outcomesInput.value,
+      );
+      updateThreadSuggestions(filtered);
+    }
   });
 
   submitButton = modal.querySelector("button[type='submit']");
@@ -322,22 +338,17 @@ function completeOutcomes(e) {
       continue;
     }
 
-    if (isStart(modifier)) {
+    if (isStart(modifier) && /\w/.test(c)) {
       val.push(c);
     } else {
-      const newVal = (val.join("") + c).toLowerCase();
-      const filtered = threads
-        .map((t) => `${modifier}${t}`)
-        .filter((t) => {
-          return t.toLowerCase().startsWith(newVal);
-        });
+      const newVal = val.join("") + c;
+      const filtered = filterThreadOutcomes(modifier, newVal);
       if (filtered.length === 1) {
         val = filtered[0].split("");
         break;
       }
       if (filtered.length > 0) {
         val.push(filtered[0][val.length]);
-        updateThreadSuggestions(filtered);
       }
     }
   }
@@ -362,6 +373,12 @@ function parseDate(dateStr) {
     second: date.second,
     timeZone: getTimeZone(),
   };
+}
+
+function filterThreadOutcomes(modifier, outcome) {
+  return threads
+    .map((t) => `${modifier}${t}`)
+    .filter((t) => t.startsWith(outcome));
 }
 
 function updateThreads() {
