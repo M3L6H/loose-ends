@@ -1,24 +1,16 @@
 import { drawContent } from "../canvas/index.js";
-import {
-  START,
-  UPDATE,
-  END,
-  addEvent,
-  getThreadsAtDate,
-} from "../events/index.js";
+import { START, UPDATE, END, addEvent } from "../events/index.js";
 import { getTimeZone } from "../settings/index.js";
+import { date, pattern } from "../utils/index.js";
 import { hideModal } from "./modal.js";
-
-const NAME_REGEX = /[A-Za-z][-_A-Za-z ]*/;
+import { createOutcomeRow, isOutcomeValid } from "./outcomeRow.js";
 
 let modal;
 let nameInput;
 let dateInput;
 let descriptionInput;
-let outcomesFieldset;
-let threadSuggestions;
+let eventOutcomes;
 let submitButton;
-let threads = [];
 
 const yr = (i) => (c, v) => {
   if (/[0-9]/.test(c)) {
@@ -124,38 +116,6 @@ const DATE_PARSERS = [
   insZero(59),
 ];
 
-const modifiers = ["Start ", "Update ", "End "];
-
-const isStart = (modifier) => modifier.trim() === "Start";
-
-function parsePartialOutcomeModifier(c, v, mod) {
-  for (let i = v.length; i < mod.length; ++i) {
-    const ch = mod[i];
-    v.push(ch);
-    if (ch === c) return true;
-  }
-  return false;
-}
-
-function parseOutcomeModifier(c, v) {
-  if (v.length === 0) {
-    for (const m of modifiers) {
-      if (c.toUpperCase() === m[0]) {
-        v.push(m[0]);
-      }
-    }
-    return true;
-  }
-
-  for (const m of modifiers) {
-    if (v[0] === m[0]) {
-      return parsePartialOutcomeModifier(c, v, m);
-    }
-  }
-
-  return true;
-}
-
 function getNow() {
   return Temporal.Now.zonedDateTimeISO(getTimeZone());
 }
@@ -193,8 +153,11 @@ export function init() {
     });
     dateInput.placeholder = now;
     dateInput.value = now;
-    updateThreads();
-    updateThreadSuggestions(modifiers);
+    eventOutcomes.appendChild(createOutcomeRow(1));
+  });
+
+  modal.addEventListener("close", () => {
+    eventOutcomes.innerHTML = "";
   });
 
   const form = modal.querySelector("form");
@@ -225,15 +188,8 @@ export function init() {
   });
 
   descriptionInput = modal.querySelector("#event-description");
-
-  outcomesFieldset = modal.querySelector("#event-outcomes");
-  outcomesFieldset.querySelectorAll("input").forEach((outcomeInput) => {
-    outcomeInput.addEventListener("beforeinput", outcomeBeforeInputListener);
-    outcomeInput.addEventListener("input", outcomeInputListener);
-  });
-
+  eventOutcomes = modal.querySelector("#event-outcomes");
   submitButton = modal.querySelector("button[type='submit']");
-  threadSuggestions = document.getElementById("thread-suggestions");
 
   checkValid();
 }
@@ -241,7 +197,7 @@ export function init() {
 function submit() {
   const event = {
     name: nameInput.value,
-    date: parseDate(dateInput.value),
+    date: date.parseDate(dateInput.value, getTimeZone()),
     description: descriptionInput.value,
     threads: outcomesInput.value.split(/\s*\n\s*/).reduce((obj, line) => {
       const [outcome, ...threadParts] = line.split(/\s+/);
@@ -286,172 +242,18 @@ function completeDate(e) {
   dateInput.value = val;
 }
 
-function outcomeBeforeInputListener(e) {
-  if (e.inputType !== "insertText") return;
-  e.preventDefault();
-  completeOutcomes(e);
-  e.target.dispatchEvent(
-    new Event("input", {
-      bubbles: true,
-    }),
-  );
-}
-
-function outcomeInputListener(e) {
-  const { value } = e.target;
-  const [modifier, thread] = value.split(/\s+/);
-  if (thread === undefined) {
-    updateThreadSuggestions(modifiers);
-  } else {
-    const filtered = isStart(modifier)
-      ? []
-      : filterThreadOutcomes(modifier + " ", value);
-    updateThreadSuggestions(filtered);
-  }
-
-  e.target.showPicker();
-
-  const outcomes = outcomesFieldset.querySelectorAll("input");
-
-  if (isOutcomeValid(value)) {
-    if (parseInt(e.target.dataset.outcomeId) === outcomes.length) {
-      appendOutcomeInput();
-    }
-  } else if (parseInt(e.target.dataset.outcomeId) === outcomes.length - 1) {
-    popOutcomeInput();
-  }
-}
-
-function appendOutcomeInput() {
-  const inputs = outcomesFieldset.querySelectorAll("input");
-  const id = inputs.length + 1;
-
-  const input = document.createElement("input");
-  input.dataset.outcomeId = id;
-  input.id = `outcome-${id}`;
-  input.placeholder = "Start My New Thread";
-  input.setAttribute("list", "thread-suggestions");
-  input.addEventListener("beforeinput", outcomeBeforeInputListener);
-  input.addEventListener("input", outcomeInputListener);
-
-  const label = document.createElement("label");
-  label.setAttribute("for", input.id);
-  label.innerText = `Outcome ${id}`;
-
-  outcomesFieldset.appendChild(label);
-  outcomesFieldset.appendChild(input);
-}
-
-function popOutcomeInput() {
-  const inputs = outcomesFieldset.querySelectorAll("input");
-  inputs[inputs.length - 1].remove();
-  const labels = outcomesFieldset.querySelectorAll("label");
-  labels[labels.length - 1].remove();
-}
-
-function completeOutcomes(e) {
-  const prev = e.target.value;
-  const pos = e.target.selectionStart;
-  const text = e.data;
-  const end = pos + text.length;
-  let val = [];
-  let parseModifier = true;
-  let modifier = "";
-
-  for (let i = 0; i < end; ++i) {
-    const c = i < pos ? prev[i] : text[i - pos];
-    if (parseModifier) {
-      if (!parseOutcomeModifier(c, val)) --i;
-      parseModifier = val[val.length - 1] !== " ";
-
-      if (!parseModifier) {
-        modifier = val.join("");
-        if (isStart(modifier)) {
-          updateThreadSuggestions([]);
-        } else {
-          updateThreadSuggestions(threads.map((t) => `${modifier}${t}`));
-        }
-      }
-      continue;
-    }
-
-    if (isStart(modifier) && /\w/.test(c)) {
-      val.push(c);
-    } else {
-      const newVal = val.join("") + c;
-      const filtered = filterThreadOutcomes(modifier, newVal);
-      if (filtered.length === 1) {
-        val = filtered[0].split("");
-        break;
-      }
-      if (filtered.length > 0) {
-        val.push(filtered[0][val.length]);
-      }
-    }
-  }
-
-  val = val.join("");
-  e.target.value = val;
-}
-
-/**
- * Parse a (ISO-8061) date string into date parts.
- *
- * @param {string} dateStr - The date string to parse
- */
-function parseDate(dateStr) {
-  const date = Temporal.PlainDateTime.from(dateStr);
-  return {
-    year: date.year,
-    month: date.month,
-    day: date.day,
-    hour: date.hour,
-    minute: date.minute,
-    second: date.second,
-    timeZone: getTimeZone(),
-  };
-}
-
-function filterThreadOutcomes(modifier, outcome) {
-  return threads
-    .map((t) => `${modifier}${t}`)
-    .filter((t) => t.startsWith(outcome));
-}
-
-function updateThreads() {
-  threads = getThreadsAtDate(parseDate(dateInput.value));
-}
-
-function updateThreadSuggestions(suggestions) {
-  const newSuggestions = threadSuggestions.cloneNode(true);
-  newSuggestions.innerHTML = "";
-  suggestions.forEach((suggestion) => {
-    const option = document.createElement("option");
-    option.value = suggestion;
-    newSuggestions.appendChild(option);
-  });
-  threadSuggestions.replaceWith(newSuggestions);
-  threadSuggestions = newSuggestions;
-}
-
-function isOutcomeValid(outcome) {
-  const [modifier, thread] = outcome.split(/\s+/);
-  const isValidModifier = modifiers.includes(modifier + " ");
-  const isModifierStart = isStart(modifier);
-  const isValidStartThread = isModifierStart && NAME_REGEX.test(thread ?? "");
-  const isThreadValid = isValidStartThread || threads.includes(thread);
-  return isValidModifier && isThreadValid;
-}
-
 function checkValid() {
-  const nameValid = NAME_REGEX.test(nameInput.value);
+  const nameValid = pattern.NAME_REGEX.test(nameInput.value);
   const dateValid = /[0-9]{4}-[0-9]{2}-[0-9]{2}T(?:[0-9]{2}:){2}[0-9]{2}/.test(
     dateInput.value,
   );
-  const outcomes = [...outcomesFieldset.querySelectorAll("input")];
+  const outcomes = [...eventOutcomes.querySelectorAll(".outcome-row")];
   const outcomesValid =
-    outcomes.every(({ value }) => value === "" || isOutcomeValid(value)) &&
-    outcomes.length > 1;
+    outcomes.every((row) => {
+      const { value: modifier } = row.querySelector("select");
+      const { value: thread } = row.querySelector("input");
+      return thread === "" || isOutcomeValid(modifier, thread);
+    }) && outcomes.length > 1;
 
   submitButton.disabled = !(nameValid && dateValid && outcomesValid);
 }

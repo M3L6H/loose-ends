@@ -201,7 +201,7 @@ fieldset {
   gap: 8px;
 }
 
-fieldset > label {
+fieldset label {
   display: none;
 }
 
@@ -213,6 +213,7 @@ form {
   gap: 12px;
 }
 
+form select,
 form input,
 form textarea {
   font-size: 1rem;
@@ -297,7 +298,7 @@ h6 {
   align-items: stretch;
 }
 
-.form-input * {
+.form-input > * {
   width: 100%;
 }
 
@@ -332,6 +333,20 @@ h6 {
 
   width: 600px;
   max-width: 80vw;
+}
+
+.outcome-row {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+}
+
+.outcome-row input {
+  flex: 1 0;
+}
+
+.outcome-row select {
+  flex: 0 0 auto;
 }
 
 .title {
