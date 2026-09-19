@@ -1,7 +1,8 @@
-import { getThreadsAtDate } from "../events/index.js";
+import { START, UPDATE, END, getThreadsAtDate } from "../events/index.js";
 import { getTimeZone } from "../settings/index.js";
 import { date, pattern } from "../utils/index.js";
 
+const VALID_MODIFIERS = [START, UPDATE, END];
 let threads = [];
 
 /**
@@ -13,10 +14,13 @@ let threads = [];
  * @returns {boolean} True if the modifier-thread outcome is valid
  */
 export function isOutcomeValid(modifier, thread) {
+  const isModifierValid = VALID_MODIFIERS.includes(modifier);
   const isModifierStart = isStart(modifier);
+  const isNewThread = !threads.includes(thread);
   const isValidStartThread =
-    isModifierStart && pattern.NAME_REGEX.test(thread ?? "");
-  return isValidStartThread || threads.includes(thread);
+    isModifierStart && pattern.NAME_REGEX.test(thread ?? "") && isNewThread;
+  const isValidOtherThread = !isModifierStart && isModifierValid && !isNewThread;
+  return isValidStartThread || isValidOtherThread;
 }
 
 /**
@@ -40,6 +44,19 @@ export function createOutcomeRow(id) {
   row.dataset.outcomeId = id;
 
   return row;
+}
+
+/**
+ * Extract the outcome from a row
+ *
+ * @param {HTMLDivElement} row - The outcome row
+ *
+ * @returns {string[]} The outcome
+ */
+export function getOutcome(row) {
+  const modifier = row.querySelector("select")?.value?.trim() ?? "";
+  const thread = row.querySelector("input")?.value?.trim() ?? "";
+  return [modifier, thread];
 }
 
 /**

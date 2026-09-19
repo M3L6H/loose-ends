@@ -1,9 +1,9 @@
 import { drawContent } from "../canvas/index.js";
-import { START, UPDATE, END, addEvent } from "../events/index.js";
+import { addEvent } from "../events/index.js";
 import { getTimeZone } from "../settings/index.js";
 import { date, pattern } from "../utils/index.js";
 import { hideModal } from "./modal.js";
-import { createOutcomeRow, isOutcomeValid } from "./outcomeRow.js";
+import { createOutcomeRow, getOutcome, isOutcomeValid } from "./outcomeRow.js";
 
 let modal;
 let nameInput;
@@ -199,21 +199,10 @@ function submit() {
     name: nameInput.value,
     date: date.parseDate(dateInput.value, getTimeZone()),
     description: descriptionInput.value,
-    threads: outcomesInput.value.split(/\s*\n\s*/).reduce((obj, line) => {
-      const [outcome, ...threadParts] = line.split(/\s+/);
-      const thread = threadParts.join(" ");
-      switch (outcome.toLowerCase()) {
-        case "create":
-        case "start":
-          obj[thread] = START;
-          break;
-        case "update":
-          obj[thread] = UPDATE;
-          break;
-        case "end":
-          obj[thread] = END;
-          break;
-      }
+    threads: eventOutcomes.querySelectorAll(".outcome-row").reduce((obj, row) => {
+      const [modifier, thread] = getOutcome(row);
+      if (!isOutcomeValid(modifier, thread)) return obj;
+      obj[thread] = modifier;
       return obj;
     }, {}),
   };
