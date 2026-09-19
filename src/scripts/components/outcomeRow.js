@@ -73,6 +73,9 @@ function createOutcomeSelect(input, id) {
   appendPlaceholderOption(select, "Select Outcome");
   ["Start", "Update", "End"].forEach((opt) => appendOption(select, opt));
 
+  select.addEventListener("focus", () => {
+    select.querySelector(".placeholder")?.remove();
+  });
   select.addEventListener("change", () => {
     input.disabled = false;
     input.value = "";
@@ -90,8 +93,8 @@ function createOutcomeSelect(input, id) {
  */
 function appendPlaceholderOption(select, opt) {
   const option = appendOption(select, opt);
-  option.disabled = true;
-  option.hidden = true;
+  option.value = "";
+  option.classList.add("placeholder");
   return option;
 }
 
