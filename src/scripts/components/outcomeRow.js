@@ -75,6 +75,7 @@ function createOutcomeSelect(input, id) {
 
   select.addEventListener("focus", () => {
     select.querySelector(".placeholder")?.remove();
+    input.disabled = false;
   });
   select.addEventListener("change", () => {
     input.disabled = false;
