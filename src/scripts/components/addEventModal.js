@@ -239,8 +239,7 @@ function checkValid() {
   const outcomes = [...eventOutcomes.querySelectorAll(".outcome-row")];
   const outcomesValid =
     outcomes.every((row) => {
-      const { value: modifier } = row.querySelector("select");
-      const { value: thread } = row.querySelector("input");
+      const [modifier, thread] = getOutcome(row);
       return thread === "" || isOutcomeValid(modifier, thread);
     }) && outcomes.length > 1;
 

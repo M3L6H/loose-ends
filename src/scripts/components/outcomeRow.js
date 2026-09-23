@@ -155,15 +155,30 @@ function outcomeInputListener(e) {
 
   filterThreadSuggestions(modifier, thread);
 
-  // const outcomes = eventOutcomes.querySelectorAll("input");
-  //
-  // if (isOutcomeValid(modifier, thread)) {
-  //   if (parseInt(e.target.dataset.outcomeId) === outcomes.length) {
-  //     // appendOutcomeInput();
-  //   }
+  const outcomeParent = e.target.parentElement;
+  const outcomes = outcomeParent.querySelectorAll(".outcome-row");
+
+  if (isOutcomeValid(modifier, thread)) {
+    if (parseInt(e.target.dataset.outcomeId) === outcomes.length) {
+      appendOutcomeRow(outcomes.length + 1, outcomeParent);
+    }
   // } else if (parseInt(e.target.dataset.outcomeId) === outcomes.length - 1) {
   //   popOutcomeInput();
-  // }
+  }
+}
+
+/**
+ * Append a new outcome row to the list of outcomes.
+ *
+ * @param {number} id - Id for the new row
+ * @param {HTMLElement} outcomeParent - Parent element for the row
+ *
+ * @returns {HTMLDivElement} The new row
+ */
+function appendOutcomeRow(id, outcomeParent) {
+  const row = createOutcomeRow(id);
+  outcomeParent.appendChild(row);
+  return row; 
 }
 
 /**
