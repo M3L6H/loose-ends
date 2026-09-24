@@ -184,7 +184,6 @@ export function init() {
       ...e,
       data: "$",
     });
-    updateThreads();
   });
 
   descriptionInput = modal.querySelector("#event-description");
@@ -199,12 +198,15 @@ function submit() {
     name: nameInput.value,
     date: date.parseDate(dateInput.value, getTimeZone()),
     description: descriptionInput.value,
-    threads: eventOutcomes.querySelectorAll(".outcome-row").reduce((obj, row) => {
-      const [modifier, thread] = getOutcome(row);
-      if (!isOutcomeValid(modifier, thread)) return obj;
-      obj[thread] = modifier;
-      return obj;
-    }, {}),
+    threads: [...eventOutcomes.querySelectorAll(".outcome-row")].reduce(
+      (obj, row) => {
+        const [modifier, thread] = getOutcome(row);
+        if (!isOutcomeValid(modifier, thread)) return obj;
+        obj[thread] = modifier;
+        return obj;
+      },
+      {},
+    ),
   };
   addEvent(event);
   drawContent();

@@ -155,15 +155,17 @@ function outcomeInputListener(e) {
 
   filterThreadSuggestions(modifier, thread);
 
-  const outcomeParent = e.target.parentElement;
+  const outcomeRow = e.target.parentElement;
+  const outcomeParent = outcomeRow.parentElement;
   const outcomes = outcomeParent.querySelectorAll(".outcome-row");
+  const outcomeId = parseInt(outcomeRow.dataset.outcomeId);
 
   if (isOutcomeValid(modifier, thread)) {
-    if (parseInt(e.target.parentElement.dataset.outcomeId) === outcomes.length) {
+    if (outcomeId === outcomes.length) {
       appendOutcomeRow(outcomes.length + 1, outcomeParent);
     }
-  // } else if (parseInt(e.target.dataset.outcomeId) === outcomes.length - 1) {
-  //   popOutcomeInput();
+  } else if (outcomeId === outcomes.length - 1) {
+    popOutcomeRow(outcomeParent);
   }
 }
 
@@ -178,7 +180,18 @@ function outcomeInputListener(e) {
 function appendOutcomeRow(id, outcomeParent) {
   const row = createOutcomeRow(id);
   outcomeParent.appendChild(row);
-  return row; 
+  return row;
+}
+
+/**
+ * Pop the last outcome row from the list
+ *
+ * @param {HTMLElement} outcomeParent - Parent element for the row
+ */
+function popOutcomeRow(outcomeParent) {
+  const children = outcomeParent.children;
+  if (children.length === 0) return;
+  children[children.length - 1].remove();
 }
 
 /**
