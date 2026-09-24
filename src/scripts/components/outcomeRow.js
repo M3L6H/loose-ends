@@ -159,7 +159,7 @@ function outcomeInputListener(e) {
   const outcomes = outcomeParent.querySelectorAll(".outcome-row");
 
   if (isOutcomeValid(modifier, thread)) {
-    if (parseInt(e.target.dataset.outcomeId) === outcomes.length) {
+    if (parseInt(e.target.parentElement.dataset.outcomeId) === outcomes.length) {
       appendOutcomeRow(outcomes.length + 1, outcomeParent);
     }
   // } else if (parseInt(e.target.dataset.outcomeId) === outcomes.length - 1) {
