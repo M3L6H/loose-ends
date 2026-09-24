@@ -167,6 +167,17 @@ function outcomeInputListener(e) {
   } else if (outcomeId === outcomes.length - 1) {
     popOutcomeRow(outcomeParent);
   }
+
+  const prevRow = outcomeParent.querySelector(
+    `[data-outcome-id="${outcomeId - 1}"]`,
+  );
+
+  if (prevRow) {
+    const prevSelect = prevRow.querySelector("select");
+    const prevInput = prevRow.querySelector("input");
+    prevSelect.disabled = !!thread;
+    prevInput.disabled = !!thread;
+  }
 }
 
 /**
