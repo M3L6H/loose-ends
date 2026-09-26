@@ -116,7 +116,7 @@ function createOutcomeInput(id) {
 function addOutcomeListeners(outcomeInput) {
   outcomeInput.addEventListener("focus", () => {
     updateThreads();
-    filterThreadSuggestions(getModifier(outcomeInput), outcomeInput.value);
+    filterThreadSuggestions(outcomeInput.parentElement);
   });
   outcomeInput.addEventListener("beforeinput", outcomeBeforeInputListener);
   outcomeInput.addEventListener("input", outcomeInputListener);
@@ -152,10 +152,10 @@ function outcomeInputListener(e) {
   const input = e.target;
   const modifier = getModifier(input);
   const thread = input.value;
-
-  filterThreadSuggestions(modifier, thread);
-
   const outcomeRow = e.target.parentElement;
+
+  filterThreadSuggestions(outcomeRow);
+
   const outcomeParent = outcomeRow.parentElement;
   const outcomes = outcomeParent.querySelectorAll(".outcome-row");
   const outcomeId = parseInt(outcomeRow.dataset.outcomeId);
@@ -251,18 +251,29 @@ function completeOutcomes(e) {
 }
 
 /**
- * Update the suggestions list with the current thread
+ * Update the suggestions list with the current row
  *
- * @param {string} modifier - The modifier of the thread
- * @param {string} thread - The thread to filter by
+ * @param {HTMLDivElement} row - The outcome row
  */
-function filterThreadSuggestions(modifier, thread) {
+function filterThreadSuggestions(row) {
+  const [modifier, thread] = getOutcome(row);
+ 
   if (isStart(modifier)) {
     updateThreadSuggestions([]);
     return;
   }
 
-  updateThreadSuggestions(threads.filter((t) => t.startsWith(thread)));
+  const id = row.dataset.outcomeId;
+  const others = new Set();
+
+  row.parentElement.querySelectorAll(".outcome-row").forEach(other => {
+    if (id === other.dataset.outcomeId) return;
+    const [otherMod, otherThread] = getOutcome(other);
+    if (isStart(otherMod)) return;
+    others.add(otherThread);
+  }); 
+
+  updateThreadSuggestions(threads.filter((t) => t.startsWith(thread) && !others.has(t)));
 }
 
 /**
