@@ -68,7 +68,7 @@ function drawEvent(ctx, event, x, y) {
       ctx.fillStyle = EVENT_COLOR;
       ctx.textAlign = "left";
       ctx.textBaseline = "middle";
-      ctx.fillText = event.name;
+      ctx.fillText(event.name, 0, 0);
     },
     ctx,
     x + EVENT_TEXT_OFFSET,
