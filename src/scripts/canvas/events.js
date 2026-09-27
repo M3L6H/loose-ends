@@ -4,6 +4,10 @@ import { drawAtGridPoint, drawCurvedLineThroughGridPoints } from "./grid.js";
 import { getStartAndEndTimes } from "./timeline.js";
 
 const EVENT_DOT_RADIUS = 6;
+const EVENT_FONT = "Tahoma, Segoe UI, sans-serif";
+const EVENT_FONT_SIZE = 10;
+const EVENT_ROT = 45;
+const EVENT_TEXT_OFFSET = 0.1;
 
 /**
  * Draw the thread element on the canvas.
@@ -34,7 +38,7 @@ export function drawEvents(ctx, centeredOn, scaleMs) {
   const visibleEvents = selectVisibleEvents(events, startTime, endTime);
   visibleEvents.forEach((event) => {
     const [x, y] = getEventCoords(event, yByThreadByX, timeData);
-    drawEvent(ctx, x, y);
+    drawEvent(ctx, event, x, y);
   });
 }
 
@@ -46,7 +50,7 @@ export function drawEvents(ctx, centeredOn, scaleMs) {
  * @param {number} x - Grid x position of the event
  * @param {number} y - Grid y position of the event
  */
-function drawEvent(ctx, x, y) {
+function drawEvent(ctx, event, x, y) {
   drawAtGridPoint(
     (ctx) => {
       ctx.fillStyle = EVENT_COLOR;
@@ -57,6 +61,19 @@ function drawEvent(ctx, x, y) {
     ctx,
     x,
     y,
+  );
+  drawAtGridPoint(
+    (ctx) => {
+      ctx.font = `${EVENT_FONT_SIZE}px ${EVENT_FONT}`;
+      ctx.fillStyle = EVENT_COLOR;
+      ctx.textAlign = "left";
+      ctx.textBaseline = "middle";
+      ctx.fillText = event.name;
+    },
+    ctx,
+    x + EVENT_TEXT_OFFSET,
+    y + EVENT_TEXT_OFFSET,
+    EVENT_ROT,
   );
 }
 

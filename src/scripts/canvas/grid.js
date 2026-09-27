@@ -87,8 +87,9 @@ export function applyAcrossGrid(fn, ctx, startingY, numRows = 1) {
  * @param {CanvasRenderingContext2D } ctx - Canvas context
  * @param {number} x - The grid column to draw in
  * @param {number} y - The grid row to draw in
+ * @param {number} rot - Rotation in degrees to apply before drawing
  */
-export function drawAtGridPoint(fn, ctx, x, y) {
+export function drawAtGridPoint(fn, ctx, x, y, rot=0) {
   const [halfNumCols, _] = getNumCols(ctx);
 
   ctx.save();
@@ -96,9 +97,12 @@ export function drawAtGridPoint(fn, ctx, x, y) {
     getCanvasWidth(ctx) / 2 + (x - halfNumCols) * GRID_SPACING,
     getTimelineSpace() + y * GRID_SPACING,
   );
+  const radians = (rot * Math.PI) / 180;
+  ctx.rotate(radians);
   fn(ctx);
   ctx.restore();
 }
+
 /**
  * Call draw fn at point on grid
  *
