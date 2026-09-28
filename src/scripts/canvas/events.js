@@ -7,7 +7,7 @@ const EVENT_DOT_RADIUS = 6;
 const EVENT_FONT = "Tahoma, Segoe UI, sans-serif";
 const EVENT_FONT_SIZE = 10;
 const EVENT_ROT = -45;
-const EVENT_TEXT_OFFSET = 0.1;
+const EVENT_TEXT_X_OFFSET = -0.2;
 
 /**
  * Draw the thread element on the canvas.
@@ -71,8 +71,8 @@ function drawEvent(ctx, event, x, y) {
       ctx.fillText(event.name, 0, 0);
     },
     ctx,
-    x + EVENT_TEXT_OFFSET,
-    y + EVENT_TEXT_OFFSET,
+    x + EVENT_TEXT_X_OFFSET,
+    y,
     isMerge(event) ? 0 : EVENT_ROT,
   );
 }
