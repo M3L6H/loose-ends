@@ -7,8 +7,8 @@ const EVENT_DOT_RADIUS = 6;
 const EVENT_FONT = "Tahoma, Segoe UI, sans-serif";
 const EVENT_FONT_SIZE = 10;
 const EVENT_ROT = -45;
-const EVENT_TEXT_X_OFFSET = -0.2;
-const EVENT_TEXT_Y_OFFSET = 0.1;
+const EVENT_TEXT_X_OFFSET = -0.3;
+const EVENT_TEXT_Y_OFFSET = 0.2;
 
 /**
  * Draw the thread element on the canvas.
