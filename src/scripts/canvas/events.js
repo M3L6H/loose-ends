@@ -8,6 +8,7 @@ const EVENT_FONT = "Tahoma, Segoe UI, sans-serif";
 const EVENT_FONT_SIZE = 10;
 const EVENT_ROT = -45;
 const EVENT_TEXT_X_OFFSET = -0.2;
+const EVENT_TEXT_Y_OFFSET = 0.1;
 
 /**
  * Draw the thread element on the canvas.
@@ -62,6 +63,9 @@ function drawEvent(ctx, event, x, y) {
     x,
     y,
   );
+
+  const isMergeEvent = isMerge(event);
+ 
   drawAtGridPoint(
     (ctx) => {
       ctx.font = `${EVENT_FONT_SIZE}px ${EVENT_FONT}`;
@@ -72,8 +76,8 @@ function drawEvent(ctx, event, x, y) {
     },
     ctx,
     x + EVENT_TEXT_X_OFFSET,
-    y,
-    isMerge(event) ? 0 : EVENT_ROT,
+    y + (isMergeEvent ? 0 : EVENT_TEXT_Y_OFFSET),
+    isMergeEvent ? 0 : EVENT_ROT,
   );
 }
 
