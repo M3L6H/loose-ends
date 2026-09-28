@@ -6,7 +6,7 @@ import { getStartAndEndTimes } from "./timeline.js";
 const EVENT_DOT_RADIUS = 6;
 const EVENT_FONT = "Tahoma, Segoe UI, sans-serif";
 const EVENT_FONT_SIZE = 10;
-const EVENT_ROT = 45;
+const EVENT_ROT = -45;
 const EVENT_TEXT_OFFSET = 0.1;
 
 /**
@@ -66,14 +66,14 @@ function drawEvent(ctx, event, x, y) {
     (ctx) => {
       ctx.font = `${EVENT_FONT_SIZE}px ${EVENT_FONT}`;
       ctx.fillStyle = EVENT_COLOR;
-      ctx.textAlign = "left";
+      ctx.textAlign = "right";
       ctx.textBaseline = "middle";
       ctx.fillText(event.name, 0, 0);
     },
     ctx,
     x + EVENT_TEXT_OFFSET,
     y + EVENT_TEXT_OFFSET,
-    EVENT_ROT,
+    isMerge(event) ? 0 : EVENT_ROT,
   );
 }
 
@@ -110,9 +110,18 @@ function getEventCoords(event, yByThreadByX, timeData) {
   const [_, threadY] = getPrimaryThreadY(event, yByThreadByX[x]);
 
   // If this event merges threads, offset its Y by 0.5
-  const y = threadY + (Object.keys(event.threads).length > 1 ? 0.5 : 0);
+  const y = threadY + (isMerge(event) ? 0.5 : 0);
 
   return [x, y];
+}
+
+/**
+ * Check whether an event merges multiple threads.
+ *
+ * @param {Event} event - The event to check
+ */
+function isMerge(event) {
+  return Object.keys(event.threads).length > 1;
 }
 
 function getXFromTimestamp(timestamp, { scaleMs, startTime }) {
