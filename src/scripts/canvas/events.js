@@ -65,7 +65,9 @@ function drawEvent(ctx, event, x, y) {
   );
 
   const isMergeEvent = isMerge(event);
- 
+  const xOffset = isMergeEvent ? EVENT_TEXT_X_OFFSET : (EVENT_TEXT_X_OFFSET / 2);
+  const yOffset = isMergeEvent ? 0 : EVENT_TEXT_Y_OFFSET;
+
   drawAtGridPoint(
     (ctx) => {
       ctx.font = `${EVENT_FONT_SIZE}px ${EVENT_FONT}`;
@@ -75,8 +77,8 @@ function drawEvent(ctx, event, x, y) {
       ctx.fillText(event.name, 0, 0);
     },
     ctx,
-    x + EVENT_TEXT_X_OFFSET,
-    y + (isMergeEvent ? 0 : EVENT_TEXT_Y_OFFSET),
+    x + xOffset,
+    y + yOffset,
     isMergeEvent ? 0 : EVENT_ROT,
   );
 }
