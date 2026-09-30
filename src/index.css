@@ -349,6 +349,18 @@ h6 {
   flex: 0 0 auto;
 }
 
+.right-panel {
+  display: flex;
+  flex-direction: column;
+  
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  
+  padding-right: 2rem;
+  padding-bottom: 3rem;
+}
+
 .title {
   color: var(--primary-dark);
 }
@@ -395,4 +407,12 @@ h6 {
 
   display: flex;
   flex-direction: column;
+}
+
+#zoom-in-btn::after {
+  content: "zoom_in";
+}
+
+#zoom-out-btn::after {
+  content: "zoom_out";
 }
