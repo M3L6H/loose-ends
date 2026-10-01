@@ -36,7 +36,6 @@ let content;
 
 let centeredOn = Temporal.Now.zonedDateTimeISO(getTimeZone()).epochMilliseconds;
 let scaleIndex = DEFAULT_SCALE;
-let scaleMs = SCALES[scaleIndex] * 1000;
 
 let dragging = false;
 let initialCenteredOn = centeredOn;
@@ -64,9 +63,45 @@ export function drawContent() {
   ctx.fillStyle = BACKGROUND_COLOR;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+  const scaleMs = getScaleMs();
+
   drawGrid(ctx);
   drawTimeline(ctx, centeredOn, scaleMs);
   drawEvents(ctx, centeredOn, scaleMs);
+}
+
+/**
+ * Return true if user can zoom into timeline.
+ */
+export function canZoomIn() {
+  return scaleIndex < SCALES.length - 1;
+}
+
+/**
+ * Return true if user can zoom out from timeline.
+ */
+export function canZoomOut() {
+  return scaleIndex > 0;
+}
+
+/**
+ * Zoom into timeline.
+ */
+export function zoomIn() {
+  scaleIndex = Math.min(scaleIndex + 1, SCALES.length - 1);
+  drawContent();
+}
+
+/**
+ * Zoom out from timeline.
+ */
+export function zoomOut() {
+  scaleIndex = Math.max(scaleIndex - 1, 0);
+  drawContent();
+}
+
+function getScaleMs() {
+  return SCALES[scaleIndex] * 1000;
 }
 
 /**
